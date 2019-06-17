@@ -1,0 +1,31 @@
+{
+  "name": "caloriestracking",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "server": "node -r @babel/register -r dotenv/config server/bin/www",
+    "lint": "npx eslint server"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^8.0.0",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "node-sass-middleware": "^0.11.0",
+    "pug": "^2.0.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
+    "babel-eslint": "^10.0.2",
+    "core-js": "^3.1.4",
+    "eslint": "^5.16.0"
+  }
+}
