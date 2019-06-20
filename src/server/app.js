@@ -4,6 +4,7 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import sassMiddleware from 'node-sass-middleware';
+import mustache from 'mustache-express';
 
 import indexRouter from './routes';
 import usersRouter from './routes/users';
@@ -11,23 +12,48 @@ import usersRouter from './routes/users';
 const app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+app.engine('html', mustache());
+app.set('view engine', 'html');
+app.set('views', path.join(__dirname, '..','..','public'));
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
+
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '..', '..', 'public')));
+} else {
+  // so it does not need to include webpack dependencies in production
+  const webpack = require('webpack');
+  const webpackDevMiddleware = require('webpack-dev-middleware');
+  const webpackHotMiddleware = require('webpack-hot-middleware');
+  const webpackConfig = require('../../webpack.dev');
+
+  const config = webpackConfig();
+  const publicPath = config.output.publicPath;
+  const compiler = webpack(config);
+
+  app.use(webpackDevMiddleware(compiler, {
+    publicPath,
+  }));
+
+  app.use(webpackHotMiddleware(compiler, {
+    publicPath,
+  }));
+}
+
 app.use(sassMiddleware({
-  src: path.join(__dirname, '..', 'public'),
-  dest: path.join(__dirname, '..', 'public'),
+  src: path.join(__dirname, '..', '..', 'public'),
+  dest: path.join(__dirname, '..', '..', 'public'),
   indentedSyntax: false, // true = .sass and false = .scss
   force: true,
 }));
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

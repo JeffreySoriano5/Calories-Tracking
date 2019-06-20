@@ -1,0 +1,1 @@
+export const SET_ACCOUNT_INFO = '@@ACCCOUNT/SET/INFO';
