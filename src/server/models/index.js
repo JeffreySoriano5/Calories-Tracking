@@ -1,13 +1,10 @@
 import mongoose from 'mongoose';
 
-import User from './user';
+//import only wanted to create model instances for the first time
+import User from './user'; //eslint-disable-line
 
 const connectDb = () => {
   return mongoose.connect(process.env.DATABASE_URL);
 };
 
-const models = {User};
-
 export {connectDb};
-
-export default models;

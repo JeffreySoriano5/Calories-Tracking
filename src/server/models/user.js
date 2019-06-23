@@ -1,25 +1,17 @@
 import mongoose from 'mongoose';
+import passportLocalMongoose from 'passport-local-mongoose';
 import indexOf from 'lodash/indexOf';
 import without from 'lodash/without';
 
 const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    unique: true,
-  },
   first_name: {
     type: String,
-    min: 2
   },
   last_name: {
     type: String,
   },
-  role: {
-    type: String,
-  },
-  permissions: {
-    type: [String],
-  },
+  role: String,
+  permissions: [String],
 });
 
 userSchema.methods.can = async function (rbac, action, resource) {
@@ -99,6 +91,7 @@ userSchema.methods.removeRole = async function () {
   return true;
 };
 
-const User = mongoose.model('User', userSchema);
+userSchema.plugin(passportLocalMongoose, {usernameField: 'email', usernameLowerCase: true});
 
-export default User;
+mongoose.model('User', userSchema);
+

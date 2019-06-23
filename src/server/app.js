@@ -5,14 +5,16 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import sassMiddleware from 'node-sass-middleware';
 import mustache from 'mustache-express';
-import {RBAC} from 'rbac';
+import passport from 'passport/lib';
+import setupAuthentication from './startup/authentication';
+import setupAuthorization from './startup/authorization';
 
 import indexRouter from './routes';
 import usersRouter from './routes/users';
-import models, {connectDb} from './models';
+import {connectDb} from './models';
 
 const getApp = async function () {
-  const app = express();
+  let app = express();
 
   // view engine setup
   app.engine('html', mustache());
@@ -54,24 +56,18 @@ const getApp = async function () {
     force: true,
   }));
 
-  //INITIALIZE RBAC
-  const rbac = new RBAC({
-    roles: ['admin', 'user', 'manager'],
-    permissions: {
-      user: ['create', 'read', 'update', 'delete'],
-      password: ['change'],
-      meal: ['create', 'read', 'update', 'delete'],
-    },
-    grants: {
-      user: ['change_password', 'create_meal', 'read_meal', 'update_meal', 'delete_meal'],
-      manager: ['create_user', 'delete_user', 'update_user', 'delete_user'],
-      admin: ['user', 'manager'],
-    },
-  });
+  await connectDb();
 
-  await rbac.init();
+  setupAuthentication(app);
+  await setupAuthorization(app);
 
-  //ROUTES (order maters)
+  // Login view POST(username + password) received.
+  // Set up with passport authenticate handler for our already registered local-strategy.
+  app.post("/login", passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/login",
+  }));
+
   //=======================================================================
   app.use('/api/users', usersRouter);
   //wil match any routes which dont match the ones above
@@ -94,9 +90,6 @@ const getApp = async function () {
     res.status(err.status || 500);
     res.render('error');
   });
-
-
-  await connectDb();
 
   return app;
 };
