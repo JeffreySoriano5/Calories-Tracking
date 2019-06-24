@@ -5,13 +5,15 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import sassMiddleware from 'node-sass-middleware';
 import mustache from 'mustache-express';
-import passport from 'passport/lib';
 import setupAuthentication from './startup/authentication';
 import setupAuthorization from './startup/authorization';
+import {connectDb} from './models';
 
 import indexRouter from './routes';
+import authRouter from './routes/auth';
 import usersRouter from './routes/users';
-import {connectDb} from './models';
+import mealsRouter from './routes/meals';
+
 
 const getApp = async function () {
   let app = express();
@@ -61,19 +63,10 @@ const getApp = async function () {
   setupAuthentication(app);
   await setupAuthorization(app);
 
-  // Login view POST(username + password) received.
-  // Set up with passport authenticate handler for our already registered local-strategy.
-  app.post("/login", passport.authenticate("local", {
-    successRedirect: "/",
-    failureRedirect: "/login",
-  }));
-
-  //=======================================================================
+  app.use('/api/auth', authRouter);
   app.use('/api/users', usersRouter);
-  //wil match any routes which dont match the ones above
+  app.use('/api/meals', mealsRouter);
   app.use('/', indexRouter);
-  //=======================================================================
-
 
   // catch 404 and forward to error handler
   app.use(function (req, res, next) {
@@ -81,14 +74,14 @@ const getApp = async function () {
   });
 
   // error handler
-  app.use(function (err, req, res) {
+  // Even if you don’t need to use the next object, you must specify it to maintain the signature
+  app.use(function (err, req, res, next) { //eslint-disable-line
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    // render the error page
     res.status(err.status || 500);
-    res.render('error');
+    res.json(err);
   });
 
   return app;

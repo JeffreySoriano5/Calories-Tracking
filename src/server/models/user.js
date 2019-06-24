@@ -6,23 +6,25 @@ import without from 'lodash/without';
 const userSchema = new mongoose.Schema({
   first_name: {
     type: String,
+    required: true,
   },
   last_name: {
     type: String,
+    required: true,
   },
-  role: String,
+  caloriesPerDay: Number,
+  role: {
+    type: String,
+    default: 'user',
+  },
   permissions: [String],
 });
 
 userSchema.methods.can = async function (rbac, action, resource) {
-  // check existence of permission
   const permission = await rbac.getPermission(action, resource);
-
   if (!permission) return false;
 
-  // check user additional permissions
   if (indexOf(this.permissions, permission.name) !== -1) return true;
-
   if (!this.role) return false;
 
   // check permission inside user role
@@ -30,31 +32,29 @@ userSchema.methods.can = async function (rbac, action, resource) {
 };
 
 userSchema.methods.addPermission = async function (rbac, action, resource) {
-  const permission = rbac.getPermission(action, resource);
+  const permission = await rbac.getPermission(action, resource);
 
-  if (!permission) return new Error('Permission not exists');
-  if (indexOf(this.permissions, permission.name) !== -1) return new Error('Permission is already assigned');
+  if (!permission) throw new Error('Permission not exists');
+  if (indexOf(this.permissions, permission.name) !== -1) return this;
 
   this.permissions.push(permission.name);
 
   const user = await this.save();
+  if (!user) throw new Error('User is undefined');
 
-  if (!user) return new Error('User is undefined');
-
-  return true;
+  return user;
 };
 
 userSchema.methods.removePermission = async function (permissionName) {
-  if (indexOf(this.permissions, permissionName) === -1) return true;
+  if (indexOf(this.permissions, permissionName) === -1) return this;
 
   this.permissions = without(this.permissions, permissionName);
 
   const user = await this.save();
-  if (!user) return new Error('User is undefined');
+  if (!user) throw new Error('User is undefined');
+  if (indexOf(user.permissions, permissionName) !== -1) throw new Error('Permission was not removed');
 
-  if (indexOf(user.permissions, permissionName) !== -1) return new Error('Permission was not removed');
-
-  return true;
+  return user;
 };
 
 userSchema.methods.hasRole = async function (rbac, role) {
@@ -64,31 +64,29 @@ userSchema.methods.hasRole = async function (rbac, role) {
 };
 
 userSchema.methods.setRole = async function (rbac, role) {
-  if (this.roles === role) return true;
+  if (this.role === role) return this;
 
-  role = rbac.getRole(role);
+  role = await rbac.getRole(role);
 
-  if (!role) return new Error('Role does not exists');
-  if (indexOf(this.roles, role.name) !== -1) return new Error('Role is already assigned');
+  if (!role) throw new Error('Role does not exists');
 
   this.role = role.name;
 
   const user = await this.save();
+  if (!user) throw Error('User is undefined');
 
-  if (!user) return new Error('User is undefined');
-
-  return true;
+  return user;
 };
 
 userSchema.methods.removeRole = async function () {
-  if (!this.role) return true;
+  if (!this.role) return this;
 
   this.role = null;
 
   const user = await this.save();
   if (!user) return new Error('User is undefined');
 
-  return true;
+  return user;
 };
 
 userSchema.plugin(passportLocalMongoose, {usernameField: 'email', usernameLowerCase: true});

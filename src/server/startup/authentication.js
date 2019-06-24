@@ -1,4 +1,4 @@
-import session from "express-session";
+import session from 'express-session';
 import passport from 'passport/lib';
 import connectMongo from 'connect-mongo';
 import mongoose from 'mongoose';
@@ -7,12 +7,11 @@ const MongoStore = connectMongo(session);
 
 export default function (app) {
   app.use(session({
-      secret: process.env.SESSION_SECRET,
-      resave: true,
-      saveUninitialized: true,
-      store: new MongoStore({mongooseConnection: mongoose.connection}),
-    })
-  );
+    secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: true,
+    store: new MongoStore({mongooseConnection: mongoose.connection}),
+  }));
 
   app.use(passport.initialize());
   app.use(passport.session());
@@ -23,6 +22,4 @@ export default function (app) {
 
   passport.serializeUser(User.serializeUser());
   passport.deserializeUser(User.deserializeUser());
-
-  return app;
 }

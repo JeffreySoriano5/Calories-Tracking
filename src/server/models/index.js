@@ -4,7 +4,10 @@ import mongoose from 'mongoose';
 import User from './user'; //eslint-disable-line
 
 const connectDb = () => {
-  return mongoose.connect(process.env.DATABASE_URL);
+  const connection = mongoose.connect(process.env.DATABASE_URL, {useNewUrlParser: true});
+  mongoose.set('useCreateIndex', true);
+
+  return connection;
 };
 
 export {connectDb};
