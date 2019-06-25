@@ -5,7 +5,7 @@ const mealSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  caloriesCount: {
+  calories_count: {
     type: Number,
     required: true,
   },

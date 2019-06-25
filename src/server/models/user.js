@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  caloriesPerDay: {
+  calories_per_day: {
     type: Number,
     required: true,
   },

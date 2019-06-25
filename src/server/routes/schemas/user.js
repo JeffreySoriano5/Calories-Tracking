@@ -6,7 +6,7 @@ export const createSchema = {
     password: Joi.string().max(30).required(),
     first_name: Joi.string().max(50).required(),
     last_name: Joi.string().max(50).required(),
-    caloriesPerDay: Joi.number().min(1).required(),
+    calories_per_day: Joi.number().min(1).required(),
   }).required(),
 };
 
@@ -14,7 +14,7 @@ export const listSchema = {
   body: Joi.object().keys({
     first_name: Joi.string().max(50),
     last_name: Joi.string().max(50),
-    caloriesPerDay: Joi.number(),
+    calories_per_day: Joi.number(),
   }).min(1).required(),
 };
 
@@ -31,7 +31,7 @@ export const updateSchema = {
   body: Joi.object().keys({
     first_name: Joi.string().max(50),
     last_name: Joi.string().max(50),
-    caloriesPerDay: Joi.number().min(1),
+    calories_per_day: Joi.number().min(1),
   }).min(1).required(),
 };
 

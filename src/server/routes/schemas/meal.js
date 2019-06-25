@@ -3,7 +3,7 @@ import {Joi} from '../../utils';
 export const createSchema = {
   body: Joi.object().keys({
     text: Joi.string().max(100).required(),
-    caloriesCount: Joi.number().required(),
+    calories_count: Joi.number().required(),
     date: Joi.date().timestamp().required(),
   }).required(),
 };
@@ -28,7 +28,7 @@ export const updateSchema = {
   }).required(),
   body: Joi.object().keys({
     text: Joi.string().max(100),
-    caloriesCount: Joi.number(),
+    calories_count: Joi.number(),
     date: Joi.date().timestamp(),
   }).min(1).required(),
 };
