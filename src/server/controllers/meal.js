@@ -2,73 +2,72 @@ import {asyncMiddleware} from '../utils';
 import mongoose from 'mongoose';
 import createError from 'http-errors';
 
-const meal_create_post = asyncMiddleware(async (req, res) => {
+const meal_create_post = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
-  let meal;
 
   try {
-    meal = await Meal.create(req.body);
+    const meal = await Meal.create(req.body);
+    return res.json(meal.toObject()).status(201);
   } catch (e) {
-    debugger;
     return next(e);
   }
-
-  return res.json(meal).status(201);
 });
 
-const meal_get = asyncMiddleware(async (req, res) => {
+const meal_get = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
-  let meal;
 
   try {
-    meal = await Meal.findById(req.params.id).exec();
+    const meal = await Meal.findById(req.params.id).exec();
+    if (!meal) return next(createError(404, 'Meal not found'));
+
+    return res.json(meal.toObject());
   } catch (e) {
-    debugger;
     return next(e);
   }
-
-  return res.json(meal);
 });
 
-const meal_list = asyncMiddleware(async (req, res) => {
+const meal_list = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
-  let meal;
 
+  //TODO: make queries depending on the arguments passed, maybe take into account pagination
+  //TODO: to object each
   try {
-    meal = await Meal.find(req.body).exec();
+    const meals = await Meal.find(req.query).exec();
+    return res.json(meals);
   } catch (e) {
-    debugger;
     return next(e);
   }
-
-  return res.json(meal);
 });
 
-const meal_update = asyncMiddleware(async (req, res) => {
+const meal_update = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
-  let meal;
 
   try {
-    meal = await Meal.findByIdAndUpdate(req.params.id, req.body);
+    let meal = await Meal.findById(req.params.id).exec();
+    if (!meal) return next(createError(404, 'Meal not found'));
+
+    meal.set(req.body);
+    if (meal.isModified()) meal = await meal.save();
+
+    return res.json(meal.toObject());
   } catch (e) {
-    debugger;
     return next(e);
   }
-
-  return res.json(meal);
 });
 
-const meal_delete = asyncMiddleware(async (req, res) => {
+const meal_delete = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
 
   try {
-    await Meal.findByIdAndDelete(req.params.id);
+    const meal = await Meal.findById(req.params.id).exec();
+    if (!meal) return next(createError(404, 'Meal not found'));
+
+    await meal.remove();
+
+    return res.json().status(204);
   } catch (e) {
-    debugger;
     return next(e);
   }
-
-  return res.json().code(204);
 });
 
 const MealController = {

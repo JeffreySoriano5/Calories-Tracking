@@ -1,15 +1,14 @@
 import {asyncMiddleware} from '../utils';
-import {getRbac} from '../startup/authorization';
 import mongoose from 'mongoose';
 import createError from 'http-errors';
 
-const user_create_post = asyncMiddleware(async (req, res) => {
+const user_create_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const {password, ...data} = req.body;
-  let user;
 
   try {
-    user = await User.register(data, password);
+    const user = await User.register(data, password);
+    return res.json(user.toObject()).status(201);
   } catch (e) {
     if (e.name === 'UserExistsError') {
       return next(createError(409, e.message));
@@ -17,63 +16,64 @@ const user_create_post = asyncMiddleware(async (req, res) => {
 
     return next(e);
   }
-
-  return res.json(user).status(201);
 });
 
-const user_get = asyncMiddleware(async (req, res) => {
-  const User = mongoose.model('User');
-  let user;
-
-  try {
-    user = await User.findById(req.params.id).exec();
-  } catch (e) {
-    debugger;
-    return next(e);
-  }
-
-  return res.json(user);
-});
-
-const user_list = asyncMiddleware(async (req, res) => {
-  const User = mongoose.model('User');
-  let user;
-
-  try {
-    user = await User.find(req.body).exec();
-  } catch (e) {
-    debugger;
-    return next(e);
-  }
-
-  return res.json(user);
-});
-
-const user_update = asyncMiddleware(async (req, res) => {
-  const User = mongoose.model('User');
-  let user;
-
-  try {
-    user = await User.findByIdAndUpdate(req.params.id, req.body);
-  } catch (e) {
-    debugger;
-    return next(e);
-  }
-
-  return res.json(user);
-});
-
-const user_delete = asyncMiddleware(async (req, res) => {
+const user_get = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
 
   try {
-    await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id).exec();
+    if (!user) return next(createError(404, 'User not found'));
+
+    return res.json(user.toObject());
   } catch (e) {
-    debugger;
     return next(e);
   }
 
-  return res.json().code(204);
+});
+
+const user_list = asyncMiddleware(async (req, res, next) => {
+  const User = mongoose.model('User');
+
+  //TODO: make queries depending on the arguments passed, maybe take into account pagination
+  //TODO: to object each
+  try {
+    const users = await User.find(req.query).exec();
+    return res.json(users);
+  } catch (e) {
+    return next(e);
+  }
+});
+
+const user_update = asyncMiddleware(async (req, res, next) => {
+  const User = mongoose.model('User');
+
+  try {
+    let user = await User.findById(req.params.id).exec();
+    if (!user) return next(createError(404, 'User not found'));
+
+    user.set(req.body);
+    if (user.isModified()) user = await user.save();
+
+    return res.json(user.toObject());
+  } catch (e) {
+    return next(e);
+  }
+});
+
+const user_delete = asyncMiddleware(async (req, res, next) => {
+  const User = mongoose.model('User');
+
+  try {
+    let user = await User.findById(req.params.id).exec();
+    if (!user) return next(createError(404, 'User not found'));
+
+    await user.remove();
+
+    return res.json().status(204);
+  } catch (e) {
+    return next(e);
+  }
 });
 
 const UserController = {

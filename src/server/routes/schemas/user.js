@@ -11,11 +11,11 @@ export const createSchema = {
 };
 
 export const listSchema = {
-  body: Joi.object().keys({
+  query: Joi.object().keys({
     first_name: Joi.string().max(50),
     last_name: Joi.string().max(50),
     calories_per_day: Joi.number(),
-  }).min(1).required(),
+  }),
 };
 
 export const readSchema = {

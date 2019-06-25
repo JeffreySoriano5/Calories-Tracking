@@ -6,7 +6,6 @@ import validate from '../middlewares/validation';
 import {createSchema} from './schemas/user';
 import {loginSchema} from './schemas/auth';
 
-
 const router = express.Router();
 
 router.post('/signup', validate(createSchema), AuthController.user_signUp_post);

@@ -9,7 +9,7 @@ export const createSchema = {
 };
 
 export const listSchema = {
-  body: Joi.object().keys({
+  query: Joi.object().keys({
     date: Joi.date().timestamp(),
     start_date: Joi.date().timestamp(),
     end_date: Joi.date().timestamp(),

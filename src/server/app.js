@@ -10,10 +10,7 @@ import setupAuthorization from './startup/authorization';
 import {connectDb} from './models';
 
 import indexRouter from './routes';
-import authRouter from './routes/auth';
-import usersRouter from './routes/users';
-import mealsRouter from './routes/meals';
-
+import apiRouter from './routes/api';
 
 const getApp = async function () {
   let app = express();
@@ -63,9 +60,7 @@ const getApp = async function () {
   setupAuthentication(app);
   await setupAuthorization(app);
 
-  app.use('/api/auth', authRouter);
-  app.use('/api/users', usersRouter);
-  app.use('/api/meals', mealsRouter);
+  app.use('/api', apiRouter);
   app.use('/', indexRouter);
 
   // catch 404 and forward to error handler

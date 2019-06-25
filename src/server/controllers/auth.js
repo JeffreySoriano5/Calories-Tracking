@@ -5,10 +5,10 @@ import mongoose from 'mongoose';
 const user_signUp_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const {password, ...data} = req.body;
-  let user;
 
   try {
-    user = await User.register(data, password);
+    const user = await User.register(data, password);
+    return res.json(user.toObject()).status(201);
   } catch (e) {
     if (e.name === 'UserExistsError') {
       return next(createError(409, e.message));
@@ -16,8 +16,6 @@ const user_signUp_post = asyncMiddleware(async (req, res, next) => {
 
     return next(e);
   }
-
-  return res.json(user).status(201);
 });
 
 const user_login_post = (req, res) => {
@@ -26,7 +24,7 @@ const user_login_post = (req, res) => {
 
 const user_logout_post = (req, res) => {
   req.logout();
-  return res.json().code(204);
+  return res.json().status(204);
 };
 
 export default {
