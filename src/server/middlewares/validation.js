@@ -25,11 +25,10 @@ export default (schema) => (
 
     return Joi.validate(obj, schema, {abortEarly: false}, (err) => {
       if (err) {
-        const paths = err.details.map((detail) => detail.path);
-        const message = `Bad Request errors in paths ${paths.join(', ')}`;
+        const paths = err.details.map((detail) => detail.path.join('.'));
+        const message = `Bad Request. Errors in paths ${paths.join(', ')}`;
 
-        res.status(400).json({message, details: err.details}).end();
-        return;
+        return res.status(400).json({message, details: err.details}).end();
       }
 
       return next();
