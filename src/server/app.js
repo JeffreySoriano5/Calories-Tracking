@@ -12,6 +12,8 @@ import {connectDb} from './models';
 import indexRouter from './routes';
 import apiRouter from './routes/api';
 
+//TODO: implement permissions and roles
+
 const getApp = async function () {
   let app = express();
 

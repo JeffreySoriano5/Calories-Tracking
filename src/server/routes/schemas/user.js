@@ -12,9 +12,9 @@ export const createSchema = {
 
 export const listSchema = {
   query: Joi.object().keys({
-    first_name: Joi.string().max(50),
-    last_name: Joi.string().max(50),
-    calories_per_day: Joi.number(),
+    name: Joi.string().max(50),
+    calories_per_day_min: Joi.number(),
+    calories_per_day_max: Joi.number(),
   }),
 };
 

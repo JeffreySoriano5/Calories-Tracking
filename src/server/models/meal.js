@@ -9,8 +9,12 @@ const mealSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  date: {         //timestamp
-    type: Number,
+  date: {
+    type: Date,
+    required: true,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
 }, {

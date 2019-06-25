@@ -1,6 +1,7 @@
-import {asyncMiddleware} from '../utils';
 import mongoose from 'mongoose';
 import createError from 'http-errors';
+import get from 'lodash/get';
+import {asyncMiddleware} from '../utils';
 
 const user_create_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
@@ -34,11 +35,33 @@ const user_get = asyncMiddleware(async (req, res, next) => {
 
 const user_list = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
+  const name = get(req, 'query.name', null);
+  const minCalories = get(req, 'query.calories_per_day_min', null);
+  const maxCalories = get(req, 'query.calories_per_day_max', null);
 
-  //TODO: make queries depending on the arguments passed, maybe take into account pagination
-  //TODO: to object each
+  const q = {};
+  const and = [];
+
+  if (name) {
+    const searchValue = new RegExp(name, 'gi');
+
+    and.push({
+      '$or': [
+        {first_name: searchValue},
+        {last_name: searchValue},
+      ],
+    });
+  }
+
+  if (minCalories) and.push({calories_per_day: {'$gte': minCalories}});
+  if (maxCalories) and.push({calories_per_day: {'$lte': maxCalories}});
+
+  if (and.length) q['$and'] = and;
+
   try {
-    const users = await User.find(req.query).exec();
+    let users = await User.find(q).exec();
+    users = users.map((user) => user.toObject());
+
     return res.json(users);
   } catch (e) {
     return next(e);

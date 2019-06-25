@@ -4,16 +4,21 @@ export const createSchema = {
   body: Joi.object().keys({
     text: Joi.string().max(100).required(),
     calories_count: Joi.number().required(),
-    date: Joi.date().timestamp().required(),
+    date: Joi.date().required(),
   }).required(),
 };
 
 export const listSchema = {
   query: Joi.object().keys({
-    date: Joi.date().timestamp(),
-    start_date: Joi.date().timestamp(),
-    end_date: Joi.date().timestamp(),
-  }).min(1).without('date', ['start_date', 'end_date']).with('start_date', 'end_date').required(),
+    text: Joi.string(),
+    min_calories: Joi.number(),
+    max_calories: Joi.number(),
+    start_date: Joi.date(),
+    end_date: Joi.date(),
+    start_time: Joi.string(),
+    end_time: Joi.string(),
+    all: Joi.default(false),
+  }),
 };
 
 export const readSchema = {
@@ -29,7 +34,7 @@ export const updateSchema = {
   body: Joi.object().keys({
     text: Joi.string().max(100),
     calories_count: Joi.number(),
-    date: Joi.date().timestamp(),
+    date: Joi.date(),
   }).min(1).required(),
 };
 
