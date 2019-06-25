@@ -12,12 +12,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  caloriesPerDay: Number,
+  caloriesPerDay: {
+    type: Number,
+    required: true,
+  },
   role: {
     type: String,
     default: 'user',
   },
   permissions: [String],
+}, {
+  toObject: {virtuals: true},
 });
 
 userSchema.methods.can = async function (rbac, action, resource) {

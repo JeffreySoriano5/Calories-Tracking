@@ -1,11 +1,21 @@
+import createError from 'http-errors';
 import {asyncMiddleware} from '../utils';
 import mongoose from 'mongoose';
 
-const user_signUp_post = asyncMiddleware(async (req, res) => {
+const user_signUp_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const {password, ...data} = req.body;
+  let user;
 
-  let user = await User.register(data, password);
+  try {
+    user = await User.register(data, password);
+  } catch (e) {
+    if (e.name === 'UserExistsError') {
+      return next(createError(409, e.message));
+    }
+
+    return next(e);
+  }
 
   return res.json(user).status(201);
 });
