@@ -4,7 +4,9 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/*', function (req, res) {
-  res.render('index.html', {auth: JSON.stringify({})});
+  const user = (req.user) ? req.user.toObject() : null;
+
+  res.render('index.html', {auth: JSON.stringify(user)});
 });
 
 export default router;

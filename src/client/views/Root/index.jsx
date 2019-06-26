@@ -6,6 +6,8 @@ import {Provider} from 'react-redux';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import Log from 'common/utils/log';
 import App from './App';
+import axios from 'axios';
+import {AxiosProvider} from 'react-axios';
 
 class Root extends Component {
   /**
@@ -19,6 +21,11 @@ class Root extends Component {
 
     const cleanTrailSlash = window.location.pathname.replace(new RegExp('/$'), '');
     props.history.replace(cleanTrailSlash + window.location.search);
+
+    this.axios = axios.create({
+      baseURL: '/api/',
+      timeout: 2000,
+    });
   }
 
   componentDidCatch(error, info) {
@@ -47,9 +54,11 @@ class Root extends Component {
 
     return (
       <Provider store={store}>
-        <Router>
-          <Route path="/" component={App}/>
-        </Router>
+        <AxiosProvider instance={this.axios}>
+          <Router>
+            <Route path="/" component={App}/>
+          </Router>
+        </AxiosProvider>
       </Provider>
     );
   }

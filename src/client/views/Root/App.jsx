@@ -8,7 +8,10 @@ import {withRouter} from 'react-router';
 import {accountConnector} from 'common/utils';
 // views
 import Home from 'views/Home';
-import TopMenu from '../components/TopMenu';
+import Login from 'views/Login';
+import SignUp from 'views/SignUp';
+
+import TopMenu from './components/TopMenu';
 
 class AuthRoute extends PureComponent {
 
@@ -27,8 +30,8 @@ class AuthRoute extends PureComponent {
 
     return (
       <Route {...rest} render={(props) => {
-        // const hasUser = Boolean(rest.user);
-        const to = null;//hasUser ? null : '/login';
+        const hasUser = !isEmpty(rest.user);
+        const to = hasUser ? null : '/login';
 
         if (redirect === false && to) {
           return null;
@@ -53,7 +56,7 @@ AuthRoute.propTypes = {
   component: PropTypes.any.isRequired,
   redirect: PropTypes.bool,
   user: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.string,
   }),
 };
 
@@ -69,15 +72,23 @@ class App extends React.Component {
    */
   render() {
     const {user} = this.props;
-    const routes = [
-      <AuthRoute path="/" key="home" component={Home} user={user}/>,
+    const routes = [];
+
+    const nonAuthRoutes = [
+      <Route exact path="/login" key="login" component={Login}/>,
+      <Route exact path="/signUp" key="signUp" component={SignUp}/>
     ];
+
+    if (!user) routes.push(...nonAuthRoutes);
+
+    routes.push(<AuthRoute path="/" exact key="home" component={Home} user={user}/>);
 
     return (
       <div className="app">
         <AuthRoute redirect={false} path="/" component={TopMenu} user={user}/>
         <Switch>
           {routes}
+          <Redirect to="/"/>
         </Switch>
       </div>
     );
