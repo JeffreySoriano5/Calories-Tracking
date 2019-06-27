@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Form, Field} from 'react-final-form'
 import flow from 'lodash/flow';
+import pick from 'lodash/pick';
+import {Field, Form} from 'react-final-form';
 import {withStyles} from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import {validators, composeValidators} from 'common/utils';
+import Grid from '@material-ui/core/Grid';
+import {validators, composeValidators, numberIsEqual} from 'common/utils';
 
 const styles = theme => ({
   form: {
@@ -17,14 +17,16 @@ const styles = theme => ({
   field: {
     margin: theme.spacing(1, 0),
   },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
+  passField: {
+    margin: theme.spacing(1, 0),
   },
 });
 
-class SignUpForm extends React.Component {
+class UserForm extends React.Component {
   render() {
-    const {classes, onSubmit, errorMsg} = this.props;
+    const {onSubmit, operation, initialValues, classes, errorMsg} = this.props;
+
+    const initValues = pick(initialValues, ['first_name', 'last_name', 'email', 'calories_per_day']);
 
     const nameValidator = composeValidators(
       validators.isRequired,
@@ -38,10 +40,15 @@ class SignUpForm extends React.Component {
       validators.maxValue(50000)
     );
 
+    let emailFieldInputProps;
+
+    if (operation === 'update') emailFieldInputProps = {readOnly: true, disabled: true};
+
     return (
       <Form
         onSubmit={onSubmit}
-        render={({handleSubmit, values, submitting, invalid}) => (
+        initialValues={initValues}
+        render={({handleSubmit, submitting, values, invalid, dirty}) => (
           <form onSubmit={handleSubmit} className={classes.form}>
             <Grid container spacing={1}>
               <Grid item xs={6}>
@@ -85,6 +92,7 @@ class SignUpForm extends React.Component {
               {({input, meta}) => (
                 <TextField
                   {...input}
+                  inputProps={emailFieldInputProps}
                   className={classes.field}
                   variant="outlined"
                   margin="normal"
@@ -99,7 +107,7 @@ class SignUpForm extends React.Component {
                 />
               )}
             </Field>
-            <Field name="calories_per_day" validate={caloriesValidator}>
+            <Field name="calories_per_day" validate={caloriesValidator} isEqual={numberIsEqual}>
               {({input, meta}) => (
                 <TextField
                   {...input}
@@ -117,56 +125,49 @@ class SignUpForm extends React.Component {
                 />
               )}
             </Field>
-            <Field name="password" validate={validators.isRequired}>
-              {({input, meta}) => (
-                <TextField
-                  {...input}
-                  className={classes.field}
-                  variant="outlined"
-                  margin="normal"
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  error={meta.error && meta.touched}
-                  FormHelperTextProps={{error: meta.error && meta.touched}}
-                  helperText={(meta.error && meta.touched) ? meta.error : ' '}
-                />
-              )}
-            </Field>
-            <Field name="confirm_password" validate={composeValidators(
-              validators.isRequired,
-              validators.isEqual(values.password, 'Password'),
-            )}>
-              {({input, meta}) => (
-                <TextField
-                  {...input}
-                  className={classes.field}
-                  variant="outlined"
-                  margin="normal"
-                  fullWidth
-                  name="confirm_password"
-                  label="Confirm Password"
-                  type="password"
-                  id="confirm_password"
-                  error={meta.error && meta.touched}
-                  FormHelperTextProps={{error: meta.error && meta.touched}}
-                  helperText={(meta.error && meta.touched) ? meta.error : ' '}
-                />
-              )}
-            </Field>
+            {operation === 'create' && <React.Fragment>
+              <Field name="password" validate={validators.isRequired}>
+                {({input, meta}) => (
+                  <TextField
+                    {...input}
+                    className={classes.field}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    error={meta.error && meta.touched}
+                    FormHelperTextProps={{error: meta.error && meta.touched}}
+                    helperText={(meta.error && meta.touched) ? meta.error : ' '}
+                  />
+                )}
+              </Field>
+              <Field name="confirm_password" validate={composeValidators(
+                validators.isRequired,
+                validators.isEqual(values.password, 'Password'),
+              )}>
+                {({input, meta}) => (
+                  <TextField
+                    {...input}
+                    className={classes.field}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    name="confirm_password"
+                    label="Confirm Password"
+                    type="password"
+                    id="confirm_password"
+                    error={meta.error && meta.touched}
+                    FormHelperTextProps={{error: meta.error && meta.touched}}
+                    helperText={(meta.error && meta.touched) ? meta.error : ' '}
+                  />
+                )}
+              </Field>
+            </React.Fragment>}
             <FormHelperText error>{errorMsg}</FormHelperText>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              disabled={submitting || invalid}
-              className={classes.submit}
-            >
-              Sign Up
-            </Button>
+            {this.props.footer(submitting, invalid, dirty)}
           </form>
         )}
       />
@@ -174,12 +175,21 @@ class SignUpForm extends React.Component {
   }
 }
 
-SignUpForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
+
+UserForm.propTypes = {
+  afterClosed: PropTypes.func,
+  onSubmit: PropTypes.func,
+  initialValues: PropTypes.object,
+  operation: PropTypes.string,
+  classes: PropTypes.object,
+  footer: PropTypes.func.isRequired,
   errorMsg: PropTypes.string,
-  classes: PropTypes.classes,
+};
+
+UserForm.defaultProps = {
+  operation: 'create',
 };
 
 export default flow(
-  withStyles(styles),
-)(SignUpForm);
+  withStyles(styles)
+)(UserForm);

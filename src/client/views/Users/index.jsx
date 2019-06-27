@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import Dialog from 'common/components/Dialog';
 import {accountConnector, hasPermissions} from 'common/utils';
-import UserForm from './component/Form';
+import UserModal from './component/Dialog';
 
 class Users extends React.Component {
   state = {
@@ -109,15 +109,15 @@ class Users extends React.Component {
 
     return (
       <React.Fragment>
-        <UserForm title={`${capitalize(operation)} User`}
-                  initialValues={actualUser}
-                  operation={operation}
-                  submitText={operation}
-                  onSubmit={handler}
-                  open={isOpen}
-                  onClose={this.onClose}
-                  afterClosed={this.onClosed}
-                  errorMsg={errorMsg}
+        <UserModal title={`${capitalize(operation)} User`}
+                   initialValues={actualUser}
+                   operation={operation}
+                   submitText={operation}
+                   onSubmit={handler}
+                   open={isOpen}
+                   onClose={this.onClose}
+                   afterClosed={this.onClosed}
+                   errorMsg={errorMsg}
         />
         <Dialog title='Delete user' open={isDeleting} onClose={this.onDeleteClose} actions={deleteActions}>
           <DialogContentText>

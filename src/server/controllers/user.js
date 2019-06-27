@@ -49,7 +49,7 @@ const user_list = asyncMiddleware(async (req, res, next) => {
       '$or': [
         {first_name: searchValue},
         {last_name: searchValue},
-        {email: searchValue}
+        {email: searchValue},
       ],
     });
   }

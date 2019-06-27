@@ -11,8 +11,9 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
+import Button from '@material-ui/core/Button';
 import {setSignUpInfo} from 'common/redux/actions/auth'
-import SignUpForm from './components/Form';
+import UserForm from 'common/components/UserForm';
 
 const styles = theme => ({
   '@global': {
@@ -53,6 +54,23 @@ class Login extends React.Component {
     });
   };
 
+  getFooter = (submitting, invalid) => {
+    const {classes} = this.props;
+
+    return (
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        color="primary"
+        disabled={submitting || invalid}
+        className={classes.submit}
+      >
+        Sign Up
+      </Button>
+    );
+  };
+
   render() {
     const {classes} = this.props;
 
@@ -67,7 +85,7 @@ class Login extends React.Component {
             <Typography component="h1" variant="h5">
               Sign up
             </Typography>
-            <SignUpForm onSubmit={this.onSignUp} errorMsg={this.state.signupError}/>
+            <UserForm onSubmit={this.onSignUp} errorMsg={this.state.signupError} footer={this.getFooter}/>
           </div>
         </Container>
       </div>
