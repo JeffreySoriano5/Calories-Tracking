@@ -18,9 +18,9 @@ class Users extends React.Component {
         }
       }).then(({data}) => {
         resolve({
-          data: data.items,// your data array
-          page: query.page,// current page number
-          totalCount: data.total, // total page number
+          data: data.items,
+          page: query.page,
+          totalCount: data.total,
         });
       }).catch(({response}) => {
         reject(response);

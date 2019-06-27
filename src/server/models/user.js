@@ -3,6 +3,7 @@ import mongoosePaginate from 'mongoose-paginate-v2';
 import passportLocalMongoose from 'passport-local-mongoose';
 import indexOf from 'lodash/indexOf';
 import without from 'lodash/without';
+import union from 'lodash/union';
 
 const userSchema = new mongoose.Schema({
   first_name: {
@@ -25,6 +26,14 @@ const userSchema = new mongoose.Schema({
 }, {
   toObject: {virtuals: true},
 });
+
+userSchema.methods.getScope = async function (rbac) {
+  const permissions = this.permissions || [];
+
+  const scope = await rbac.getScope(this.role);
+
+  return union(permissions, scope);
+};
 
 userSchema.methods.can = async function (rbac, action, resource) {
   const permission = await rbac.getPermission(action, resource);

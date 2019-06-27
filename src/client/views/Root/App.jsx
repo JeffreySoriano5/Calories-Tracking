@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import flow from 'lodash/flow';
 import {withRouter} from 'react-router';
-import {accountConnector} from 'common/utils';
+import {accountConnector, hasPermissions} from 'common/utils';
 // views
 import Login from 'views/Login';
 import SignUp from 'views/SignUp';
@@ -32,10 +32,15 @@ class AuthRoute extends PureComponent {
     return (
       <Route {...rest} render={(props) => {
         const hasUser = !isEmpty(rest.user);
-        const to = hasUser ? null : '/login';
+        const needsPerm = Array.isArray(rest.permissions) && !isEmpty(rest.permissions);
+        let to = (hasUser) ? null : '/login';
 
-        if (redirect === false && to) {
-          return null;
+        if (redirect === false && to) return null;
+
+        if (needsPerm) {
+          const hasAll = hasPermissions(rest.user, rest.permissions);
+
+          if (!hasAll) to = '/not-found';
         }
 
         this.parseQueryString(props.location);
@@ -56,6 +61,7 @@ class AuthRoute extends PureComponent {
 AuthRoute.propTypes = {
   component: PropTypes.any.isRequired,
   redirect: PropTypes.bool,
+  withRole: PropTypes.array,
   user: PropTypes.shape({
     id: PropTypes.string,
   }),
@@ -84,7 +90,8 @@ class App extends React.Component {
 
     routes = routes.concat([
       <AuthRoute path="/" exact key="home" component={Home} user={user}/>,
-      <AuthRoute path="/users" exact key="users" component={Users} user={user}/>
+      <AuthRoute path="/users" exact key="users" permissions={['read_user']} component={Users} user={user}/>,
+      <Route exact path="/not-found" key="not-found" render={() => <div>NOT FOUND</div>}/>
     ]);
 
     return (
@@ -92,7 +99,7 @@ class App extends React.Component {
         <AuthRoute redirect={false} path="/" component={TopMenu} user={user}/>
         <Switch>
           {routes}
-          <Redirect to="/"/>
+          <Redirect to="/not-found"/>
         </Switch>
       </div>
     );

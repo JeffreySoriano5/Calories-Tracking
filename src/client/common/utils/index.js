@@ -1,6 +1,7 @@
 import {connect} from 'react-redux';
 import {createSelector} from 'reselect';
 import validate from 'validate.js';
+import includes from 'lodash/includes';
 
 
 const accountConnector = connect(createSelector(
@@ -8,6 +9,11 @@ const accountConnector = connect(createSelector(
   (user) => (user),
 ), null, null, {forwardRef: true});
 
+const hasPermissions = (user, permissions) => {
+  return permissions.every((reqPerm) => {
+    return includes(user.permissions, reqPerm);
+  });
+};
 
 const isRequired = value => {
   return (validate.isEmpty(value)) ? 'Required' : undefined;
@@ -49,6 +55,10 @@ const isEqual = (toCompare, name) => value => {
   return (value && toCompare && value !== toCompare) ? `${name} must match` : undefined;
 };
 
+const numberIsEqual = (a, b) => {
+  return parseInt(a) === parseInt(b);
+};
+
 const composeValidators = (...validators) => value =>
   validators.reduce((error, validator) => error || validator(value), undefined);
 
@@ -65,6 +75,8 @@ const validators = {
 
 export {
   accountConnector,
+  hasPermissions,
   validators,
   composeValidators,
+  numberIsEqual,
 };
