@@ -12,15 +12,22 @@ import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import {connect} from 'react-redux';
+import {NavLink} from "react-router-dom";
 import {logout} from 'common/redux/actions/auth'
+import {accountConnector, hasPermissions} from 'common/utils';
 
-const styles = () => ({
+const styles = (theme) => ({
   root: {
     flexGrow: 1,
   },
-  title: {
+  filler: {
     flexGrow: 1,
   },
+  link: {
+    textDecoration: 'none',
+    marginRight: theme.spacing(2),
+    color: theme.palette.common.white,
+  }
 });
 
 class TopMenu extends React.Component {
@@ -44,17 +51,28 @@ class TopMenu extends React.Component {
   };
 
   render() {
-    const {classes} = this.props;
+    const {classes, user} = this.props;
 
     const anchor = this.state.menuAnchor;
+    const activeStyle = {};
 
     return (
       <div className={classes.root}>
         <AppBar position="static">
           <Toolbar>
-            <Typography variant="h6" className={classes.title}>
-              News
-            </Typography>
+            <NavLink exact to='/' activeStyle={activeStyle} className={classes.link}>
+              <Typography variant="h6">
+                Meals
+              </Typography>
+            </NavLink>
+            {user && hasPermissions(user, ['read_user']) &&
+            <NavLink exact to='/users' activeStyle={activeStyle} className={classes.link}>
+              <Typography variant="h6">
+                Users
+              </Typography>
+            </NavLink>
+            }
+            <div className={classes.filler}/>
             <IconButton
               onClick={this.onMenuOpen}
               color="inherit"
@@ -93,6 +111,7 @@ const logoutConnector = connect(null, {logout});
 export default flow(
   withStyles(styles),
   logoutConnector,
+  accountConnector,
   withRouter,
   withAxios,
 )(TopMenu);

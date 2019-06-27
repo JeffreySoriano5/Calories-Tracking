@@ -1,11 +1,9 @@
 import {Joi} from '../../utils';
 
-//TODO: add regex for password
-//TODO: also modify on signup/signin and edit password
 export const createSchema = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
-    password: Joi.string().max(30).required(),
+    password: Joi.string().min(8).max(30).regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*$/).required(),
     first_name: Joi.string().max(50).required(),
     last_name: Joi.string().max(50).required(),
     calories_per_day: Joi.number().min(1).required(),

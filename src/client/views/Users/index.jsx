@@ -125,7 +125,7 @@ class Users extends React.Component {
           </DialogContentText>
         </Dialog>
         <MaterialTable
-          title='Users'
+          title=''
           tableRef={this.tableRef}
           columns={[
             {title: "Name", field: "first_name", render: rowData => `${rowData.first_name} ${rowData.last_name}`},

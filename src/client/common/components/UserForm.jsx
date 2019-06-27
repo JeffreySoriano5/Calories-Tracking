@@ -40,6 +40,13 @@ class UserForm extends React.Component {
       validators.maxValue(50000)
     );
 
+    const passwordValidator = composeValidators(
+      validators.isRequired,
+      validators.minLength(8),
+      validators.regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*$/, 'Must contain a lowercase letter, 1 uppercase letter and 1 number'),
+      validators.maxLength(40),
+    );
+
     let emailFieldInputProps;
 
     if (operation === 'update') emailFieldInputProps = {readOnly: true, disabled: true};
@@ -126,7 +133,7 @@ class UserForm extends React.Component {
               )}
             </Field>
             {operation === 'create' && <React.Fragment>
-              <Field name="password" validate={validators.isRequired}>
+              <Field name="password" validate={passwordValidator}>
                 {({input, meta}) => (
                   <TextField
                     {...input}
@@ -145,7 +152,7 @@ class UserForm extends React.Component {
                 )}
               </Field>
               <Field name="confirm_password" validate={composeValidators(
-                validators.isRequired,
+                passwordValidator,
                 validators.isEqual(values.password, 'Password'),
               )}>
                 {({input, meta}) => (

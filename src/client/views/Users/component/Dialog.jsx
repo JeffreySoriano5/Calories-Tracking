@@ -40,8 +40,7 @@ class UserDialog extends React.Component {
 
     return (
       <Dialog title={title} open={open} onClose={onClose}>
-        <Container component="main" maxWidth="xs">
-
+        <Container component="main" maxWidth="sm">
           <UserForm onSubmit={onSubmit}
                     initialValues={initialValues}
                     operation={operation}

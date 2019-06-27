@@ -125,7 +125,7 @@ class Home extends React.Component {
           </DialogContentText>
         </Dialog>
         <MaterialTable
-          title='Meals'
+          title=''
           tableRef={this.tableRef}
           columns={[
             {title: "Meal", field: "text"},

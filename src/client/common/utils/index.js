@@ -58,6 +58,13 @@ const isEqual = (toCompare, name) => value => {
   return (value && toCompare && value !== toCompare) ? `${name} must match` : undefined;
 };
 
+const regex = (regex, message) => value => {
+  if (value) {
+    const matches = value.match(regex);
+    if (!matches) return message;
+  }
+};
+
 const numberIsEqual = (a, b) => {
   return parseInt(a) === parseInt(b);
 };
@@ -74,6 +81,7 @@ const validators = {
   maxLength,
   minValue,
   maxValue,
+  regex,
 };
 
 export {
