@@ -8,14 +8,14 @@ const router = express.Router();
 
 router.use(secure.isAuthenticated);
 
-router.post('/', secure.can('create', 'meal'), validate(createSchema), MealController.meal_create_post);
+router.post('/', validate(createSchema), MealController.meal_create_post);
 
-router.get('/', secure.can('read', 'meal'), validate(listSchema), MealController.meal_list);
+router.get('/', validate(listSchema), MealController.meal_list);
 
-router.get('/:id', secure.can('read', 'meal'), validate(readSchema), MealController.meal_get);
+router.get('/:id', validate(readSchema), MealController.meal_get);
 
-router.put('/:id', secure.can('update', 'meal'), validate(updateSchema), MealController.meal_update);
+router.put('/:id', validate(updateSchema), MealController.meal_update);
 
-router.delete('/:id', secure.can('delete', 'meal'), validate(deleteSchema), MealController.meal_delete);
+router.delete('/:id', validate(deleteSchema), MealController.meal_delete);
 
 export default router;

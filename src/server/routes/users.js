@@ -12,10 +12,10 @@ router.post('/', secure.can('create', 'user'), validate(createSchema), UserContr
 
 router.get('/', secure.can('read', 'user'), validate(listSchema), UserController.user_list);
 
-router.get('/:id', secure.can('read', 'user'), validate(readSchema), UserController.user_get);
+router.get('/:id', validate(readSchema), UserController.user_get);
 
-router.put('/:id', secure.can('update', 'user'), validate(updateSchema), UserController.user_update);
+router.put('/:id', validate(updateSchema), UserController.user_update);
 
-router.delete('/:id', secure.can('delete', 'user'), validate(deleteSchema), UserController.user_delete);
+router.delete('/:id', validate(deleteSchema), UserController.user_delete);
 
 export default router;

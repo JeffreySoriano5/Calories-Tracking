@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 import get from 'lodash/get';
 import {asyncMiddleware} from '../utils';
+import {getRbac as getAuthorization} from '../startup/authorization';
 
 const user_create_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
@@ -21,6 +22,13 @@ const user_create_post = asyncMiddleware(async (req, res, next) => {
 
 const user_get = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
+  const authUser = req.user.toObject();
+  const rbac = getAuthorization();
+
+  if (req.params.id !== authUser.id) {
+    const hasPermission = await req.user.can(rbac, 'read', 'user');
+    if (!hasPermission) return next(createError(404));
+  }
 
   try {
     const user = await User.findById(req.params.id).exec();
@@ -75,6 +83,13 @@ const user_list = asyncMiddleware(async (req, res, next) => {
 
 const user_update = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
+  const authUser = req.user.toObject();
+  const rbac = getAuthorization();
+
+  if (req.params.id !== authUser.id) {
+    const hasPermission = await req.user.can(rbac, 'update', 'user');
+    if (!hasPermission) return next(createError(404));
+  }
 
   try {
     let user = await User.findById(req.params.id).exec();
@@ -91,6 +106,13 @@ const user_update = asyncMiddleware(async (req, res, next) => {
 
 const user_delete = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
+  const authUser = req.user.toObject();
+  const rbac = getAuthorization();
+
+  if (req.params.id !== authUser.id) {
+    const hasPermission = await req.user.can(rbac, 'delete', 'user');
+    if (!hasPermission) return next(createError(404));
+  }
 
   try {
     let user = await User.findById(req.params.id).exec();

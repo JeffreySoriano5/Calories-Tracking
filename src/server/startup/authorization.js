@@ -7,13 +7,12 @@ export default async function () {
     roles: ['admin', 'user', 'manager'],
     permissions: {
       user: ['create', 'read', 'update', 'delete'],
-      password: ['change'],
       meal: ['create', 'read', 'update', 'delete'],
     },
     grants: {
-      user: ['change_password', 'create_meal', 'read_meal', 'update_meal', 'delete_meal'],
+      user: [],
       manager: ['create_user', 'read_user', 'update_user', 'delete_user'],
-      admin: ['user', 'manager'],
+      admin: ['manager', 'read_meal', 'update_meal', 'delete_meal'],
     },
   });
 
