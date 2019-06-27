@@ -1,4 +1,4 @@
-import {asyncMiddleware} from '../utils';
+import {asyncMiddleware, parseSort} from '../utils';
 import mongoose from 'mongoose';
 import createError from 'http-errors';
 import get from 'lodash/get';
@@ -49,7 +49,7 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
   //Expect YYYY-MM-DD format for date
 
   try {
-    const aggregatePipeline = [];
+    let aggregatePipeline = [];
     const matchQuery = {};
     const matchAnd = [];
 
@@ -64,24 +64,22 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
 
     aggregatePipeline.push({'$match': matchQuery});
 
-    if (hasDate) {
-      aggregatePipeline.push({
-        '$addFields': {
-          formatted_date: {
-            '$dateToString': {
-              format: '%Y-%m-%d',
-              date: '$date',
-            },
-          },
-          formatted_time: {
-            '$dateToString': {
-              format: '%H:%M',
-              date: '$date',
-            },
+    aggregatePipeline.push({
+      '$addFields': {
+        formatted_date: {
+          '$dateToString': {
+            format: '%Y-%m-%d',
+            date: '$date',
           },
         },
-      });
-    }
+        formatted_time: {
+          '$dateToString': {
+            format: '%H:%M',
+            date: '$date',
+          },
+        },
+      },
+    });
 
     const datesMatchAnd = [];
 
@@ -98,6 +96,21 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
       });
     }
 
+    const countDoc = await Meal.aggregate([].concat(aggregatePipeline, [
+      {'$count': 'total'}
+    ])).exec();
+
+    const limit = req.query.limit;
+    const page = req.query.page;
+    const sort = req.query.sort;
+    const skip = (page - 1) * limit;
+
+    aggregatePipeline = [].concat(aggregatePipeline, [
+      {'$sort': parseSort(sort)},
+      {'$skip': skip},
+      {'$limit': skip + limit}
+    ]);
+
     let meals = await Meal.aggregate(aggregatePipeline).exec();
 
     meals = meals.map((meal) => {
@@ -105,7 +118,7 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
       return meal;
     });
 
-    return res.json(meals);
+    return res.json({items: meals, total: get(countDoc, '0.total', 0), page});
   } catch (e) {
     return next(e);
   }

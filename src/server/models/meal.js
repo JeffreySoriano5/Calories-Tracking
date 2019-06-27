@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const mealSchema = new mongoose.Schema({
   text: {
@@ -21,6 +22,7 @@ const mealSchema = new mongoose.Schema({
   toObject: {virtuals: true},
 });
 
+mealSchema.plugin(mongoosePaginate);
 
 mongoose.model('Meal', mealSchema);
 

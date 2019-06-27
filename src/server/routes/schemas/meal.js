@@ -10,7 +10,7 @@ export const createSchema = {
 
 export const listSchema = {
   query: Joi.object().keys({
-    text: Joi.string(),
+    text: Joi.string().allow(''),
     min_calories: Joi.number(),
     max_calories: Joi.number(),
     start_date: Joi.date(),
@@ -18,6 +18,9 @@ export const listSchema = {
     start_time: Joi.string(),
     end_time: Joi.string(),
     all: Joi.default(false),
+    limit: Joi.number().default(10),
+    page: Joi.number().default(1),
+    sort: Joi.string().default('-date'),
   }),
 };
 

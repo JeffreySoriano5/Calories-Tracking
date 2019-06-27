@@ -17,6 +17,9 @@ export const listSchema = {
     name: Joi.string().max(50),
     calories_per_day_min: Joi.number(),
     calories_per_day_max: Joi.number(),
+    limit: Joi.number().default(10),
+    page: Joi.number().default(1),
+    sort: Joi.string().default('first_name'),
   }),
 };
 

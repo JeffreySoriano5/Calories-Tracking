@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 import passportLocalMongoose from 'passport-local-mongoose';
 import indexOf from 'lodash/indexOf';
 import without from 'lodash/without';
@@ -95,6 +96,7 @@ userSchema.methods.removeRole = async function () {
 };
 
 userSchema.plugin(passportLocalMongoose, {usernameField: 'email', usernameLowerCase: true});
+userSchema.plugin(mongoosePaginate);
 
 mongoose.model('User', userSchema);
 
