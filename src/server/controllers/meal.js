@@ -121,9 +121,21 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
       {'$limit': skip + limit},
     ]);
 
+    if (getAll) {
+      aggregatePipeline.push({
+        '$lookup': {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user',
+        }
+      })
+    }
+
     let meals = await Meal.aggregate(aggregatePipeline).exec();
 
     meals = meals.map((meal) => {
+      if (getAll) meal.user = meal.user[0];
       meal.id = meal._id;
       return meal;
     });
