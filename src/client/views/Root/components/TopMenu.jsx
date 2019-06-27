@@ -31,6 +31,7 @@ class TopMenu extends React.Component {
   onLogout = () => {
     this.props.axios.post('/auth/logout').then(() => {
       this.props.logout();
+      this.props.history.push('/login');
     });
   };
 

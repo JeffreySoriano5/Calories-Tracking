@@ -1,6 +1,7 @@
 import createError from 'http-errors';
 import {asyncMiddleware} from '../utils';
 import mongoose from 'mongoose';
+import {getRbac} from '../startup/authorization';
 
 const user_signUp_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
@@ -18,9 +19,12 @@ const user_signUp_post = asyncMiddleware(async (req, res, next) => {
   }
 });
 
-const user_login_post = (req, res) => {
-  return res.json(req.user);
-};
+const user_login_post = asyncMiddleware(async (req, res) => {
+  const user = req.user.toObject();
+  user.permissions = await req.user.getScope(getRbac());
+
+  return res.json(user);
+});
 
 const user_logout_post = (req, res) => {
   req.logout();

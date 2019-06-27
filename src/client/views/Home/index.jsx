@@ -38,6 +38,7 @@ class Home extends React.Component {
       operation: '',
       actualMeal: null,
       handler: null,
+      errorMsg: null,
     });
   };
 
@@ -124,6 +125,7 @@ class Home extends React.Component {
           </DialogContentText>
         </Dialog>
         <MaterialTable
+          title='Meals'
           tableRef={this.tableRef}
           columns={[
             {title: "Meal", field: "text"},

@@ -2,6 +2,7 @@ import {connect} from 'react-redux';
 import {createSelector} from 'reselect';
 import validate from 'validate.js';
 import includes from 'lodash/includes';
+import get from 'lodash/get';
 
 
 const accountConnector = connect(createSelector(
@@ -10,6 +11,8 @@ const accountConnector = connect(createSelector(
 ), null, null, {forwardRef: true});
 
 const hasPermissions = (user, permissions) => {
+  if (!get(user, 'permissions', false)) return false;
+
   return permissions.every((reqPerm) => {
     return includes(user.permissions, reqPerm);
   });

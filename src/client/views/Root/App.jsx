@@ -37,7 +37,7 @@ class AuthRoute extends PureComponent {
 
         if (redirect === false && to) return null;
 
-        if (needsPerm) {
+        if (hasUser && needsPerm) {
           const hasAll = hasPermissions(rest.user, rest.permissions);
 
           if (!hasAll) to = '/not-found';
