@@ -118,6 +118,7 @@ class TopMenu extends React.Component {
     const {classes, user} = this.props;
 
     const open = this.state.open;
+    const {pathname} = this.props.location;
 
     return (
       <React.Fragment>
@@ -165,17 +166,24 @@ class TopMenu extends React.Component {
           </div>
           <Divider/>
           <List>
-            <ListItem button key='meals' onClick={this.redirect('/')}>
+            <ListItem button key='meals' selected={pathname === '/'} onClick={this.redirect('/')}>
               <ListItemIcon><MealIcon/> </ListItemIcon>
               <ListItemText primary='Meals'/>
             </ListItem>
-            {hasPermissions(user, ['read_user']) && <ListItem button key='users' onClick={this.redirect('/users')}>
+            {hasPermissions(user, ['read_user']) &&
+            <ListItem
+              button
+              key='users'
+              selected={pathname === '/users'}
+              onClick={this.redirect('/users')}
+            >
               <ListItemIcon> <UsersIcon/></ListItemIcon>
-              <ListItemText primary={'Users'}/>
-            </ListItem>}
-            <ListItem button key='profile' onClick={this.redirect('/profile')}>
+              <ListItemText primary='Users'/>
+            </ListItem>
+            }
+            <ListItem button key='profile' selected={pathname === '/profile'} onClick={this.redirect('/profile')}>
               <ListItemIcon> <ProfileIcon/></ListItemIcon>
-              <ListItemText primary={'Profile'}/>
+              <ListItemText primary='Profile'/>
             </ListItem>
             <Divider/>
             <ListItem button key='logout' onClick={this.onLogout}>
@@ -194,6 +202,8 @@ TopMenu.propTypes = {
   axios: PropTypes.object,
   logout: PropTypes.func,
   classes: PropTypes.object,
+  user: PropTypes.object,
+  location: PropTypes.object,
 };
 
 const logoutConnector = connect(null, {logout});

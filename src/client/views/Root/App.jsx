@@ -70,16 +70,19 @@ AuthRoute.propTypes = {
   }),
 };
 
-const drawerWidth = 240;
-
 const styles = (theme) => ({
   root: {
     display: 'flex',
   },
-  toolbar: theme.mixins.toolbar,
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    ...theme.mixins.toolbar,
+  },
   content: {
     flexGrow: 1,
-    backgroundColor: theme.palette.background.default,
     padding: theme.spacing(3),
   },
 });
@@ -111,7 +114,7 @@ class App extends React.Component {
       <AuthRoute path="/profile" exact key="profile" component={Profile} user={user}/>,
       <Route exact path="/not-found" key="not-found" render={() => <div>NOT FOUND</div>}/>
     ]);
-
+    //TODO:Create 404 page
     return (
       <div className={classes.root}>
         <CssBaseline/>
@@ -135,6 +138,7 @@ App.propTypes = {
   user: PropTypes.shape({
     id: PropTypes.string,
   }),
+  classes: PropTypes.object,
 };
 
 App.defaultProps = {

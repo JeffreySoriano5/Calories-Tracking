@@ -12,7 +12,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
-import {setSignUpInfo} from 'common/redux/actions/auth'
+import {setAccountInfo} from 'common/redux/actions/auth'
 import UserForm from 'common/components/UserForm';
 import Grid from '@material-ui/core/Grid';
 
@@ -47,11 +47,11 @@ class Login extends React.Component {
   };
 
   onUpdate = (values) => {
+    const {user} = this.props;
     values = omit(values, ['email']);
 
-    this.props.axios.put(`/users/${this.state.actualUser.id}`, values).then(() => {
-      this.onClose();
-      this.tableRef.current.onQueryChange();
+    this.props.axios.put(`/users/${user.id}`, values).then((response) => {
+      this.props.setAccountInfo(response.data);
     }).catch(() => {
       this.setState({errorMsg: "Something went wrong updating. Please try again later"});
     });
@@ -105,11 +105,11 @@ Login.propTypes = {
   user: PropTypes.object,
   match: PropTypes.object,
   axios: PropTypes.object,
-  setSignUpInfo: PropTypes.func,
+  setAccountInfo: PropTypes.func,
   classes: PropTypes.object,
 };
 
-const loginConnector = connect(null, {setSignUpInfo});
+const loginConnector = connect(null, {setAccountInfo});
 
 export default flow(
   withRouter,

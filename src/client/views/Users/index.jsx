@@ -11,6 +11,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import Dialog from 'common/components/Dialog';
 import {accountConnector, hasPermissions} from 'common/utils';
 import UserModal from './component/Dialog';
+import isString from 'lodash/isString';
+import get from 'lodash/get';
 
 class Users extends React.Component {
   state = {
@@ -94,6 +96,10 @@ class Users extends React.Component {
     });
   };
 
+  _getId = (value) => {
+    return isString(value) ? value : get(value, 'id', null);
+  };
+
   render() {
     const {user} = this.props;
     const {operation, isOpen, actualUser, handler, errorMsg, isDeleting} = this.state;
@@ -125,7 +131,7 @@ class Users extends React.Component {
           </DialogContentText>
         </Dialog>
         <MaterialTable
-          title=''
+          title='Users'
           tableRef={this.tableRef}
           columns={[
             {title: "Name", field: "first_name", render: rowData => `${rowData.first_name} ${rowData.last_name}`},
@@ -146,9 +152,10 @@ class Users extends React.Component {
                   actualUser: {date: new Date()},
                   handler: this.onCreate,
                 })
-              }
+              },
+              disabled: !hasPermissions(user, ['create_user']),
             },
-            () => ({
+            (rowData) => ({
               icon: 'edit',
               tooltip: 'Edit User',
               onClick: (event, rowData) => {
@@ -159,15 +166,15 @@ class Users extends React.Component {
                   handler: this.onUpdate,
                 })
               },
-              disabled: !hasPermissions(user, ['update_user']),
+              disabled: (this._getId(rowData.id) !== user.id) && !hasPermissions(user, ['update_user']),
             }),
-            () => ({
+            (rowData) => ({
               icon: 'delete',
               tooltip: 'Delete User',
               onClick: (event, rowData) => {
                 this.setState({isDeleting: true, actualUser: rowData});
               },
-              disabled: !hasPermissions(user, ['delete_user']),
+              disabled: (this._getId(rowData.id) !== user.id) && !hasPermissions(user, ['delete_user']),
             }),
           ]}
           options={{

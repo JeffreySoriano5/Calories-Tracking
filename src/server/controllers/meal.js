@@ -128,8 +128,8 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
           localField: 'user',
           foreignField: '_id',
           as: 'user',
-        }
-      })
+        },
+      });
     }
 
     let meals = await Meal.aggregate(aggregatePipeline).exec();
