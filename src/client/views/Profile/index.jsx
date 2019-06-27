@@ -104,7 +104,7 @@ Login.propTypes = {
   location: PropTypes.object,
   user: PropTypes.object,
   match: PropTypes.object,
-  axios: PropTypes.object,
+  axios: PropTypes.func,
   setAccountInfo: PropTypes.func,
   classes: PropTypes.object,
 };

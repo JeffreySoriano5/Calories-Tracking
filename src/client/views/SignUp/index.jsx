@@ -98,7 +98,7 @@ Signup.propTypes = {
   location: PropTypes.object,
   user: PropTypes.object,
   match: PropTypes.object,
-  axios: PropTypes.object,
+  axios: PropTypes.func,
   setSignUpInfo: PropTypes.func,
   classes: PropTypes.object,
 };

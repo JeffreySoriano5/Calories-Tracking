@@ -199,7 +199,7 @@ class TopMenu extends React.Component {
 
 TopMenu.propTypes = {
   history: PropTypes.object.isRequired,
-  axios: PropTypes.object,
+  axios: PropTypes.func,
   logout: PropTypes.func,
   classes: PropTypes.object,
   user: PropTypes.object,
@@ -209,9 +209,9 @@ TopMenu.propTypes = {
 const logoutConnector = connect(null, {logout});
 
 export default flow(
-  withStyles(styles),
   logoutConnector,
   accountConnector,
   withRouter,
   withAxios,
+  withStyles(styles),
 )(TopMenu);

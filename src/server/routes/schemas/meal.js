@@ -13,6 +13,7 @@ export const listSchema = {
     text: Joi.string().allow(''),
     min_calories: Joi.number(),
     max_calories: Joi.number(),
+    date: Joi.string(),
     start_date: Joi.date(),
     end_date: Joi.date(),
     start_time: Joi.string(),
@@ -21,7 +22,7 @@ export const listSchema = {
     limit: Joi.number().default(10),
     page: Joi.number().default(1),
     sort: Joi.string().default('-date'),
-  }),
+  }).without('date', ['start_date', 'end_date', 'start_time', 'end_time']),
 };
 
 export const readSchema = {

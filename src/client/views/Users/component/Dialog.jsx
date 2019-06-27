@@ -54,7 +54,7 @@ class UserDialog extends React.Component {
 
 UserDialog.propTypes = {
   title: PropTypes.string,
-  open: PropTypes.boolean,
+  open: PropTypes.bool,
   onClose: PropTypes.func,
   afterClosed: PropTypes.func,
   onSubmit: PropTypes.func,

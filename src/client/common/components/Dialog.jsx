@@ -30,7 +30,7 @@ class MyDialog extends React.Component {
 
 MyDialog.propTypes = {
   title: PropTypes.string,
-  open: PropTypes.boolean,
+  open: PropTypes.bool,
   onClose: PropTypes.func,
   actions: PropTypes.any,
   children: PropTypes.any,

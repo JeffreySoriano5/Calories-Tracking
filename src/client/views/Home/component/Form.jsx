@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import DateFnsUtils from "@date-io/date-fns";
 import flow from 'lodash/flow';
 import pick from 'lodash/pick';
 import {withStyles} from '@material-ui/core/styles';
@@ -9,10 +8,7 @@ import {Field, Form} from 'react-final-form';
 import TextField from '@material-ui/core/TextField';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Grid from '@material-ui/core/Grid';
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDateTimePicker,
-} from '@material-ui/pickers';
+import {KeyboardDateTimePicker} from '@material-ui/pickers';
 import Dialog from 'common/components/Dialog';
 import {validators, composeValidators, numberIsEqual} from 'common/utils';
 
@@ -88,19 +84,17 @@ class MealForm extends React.Component {
                   />
                 )}
               </Field>
-              <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <Field name="date">
-                  {({input}) => (
-                    <KeyboardDateTimePicker
-                      inputVariant="outlined"
-                      variant="outlined"
-                      label="Date"
-                      margin="normal"
-                      format="MM/dd/yyyy hh:mm a"
-                      {...input} />
-                  )}
-                </Field>
-              </MuiPickersUtilsProvider>
+              <Field name="date">
+                {({input}) => (
+                  <KeyboardDateTimePicker
+                    inputVariant="outlined"
+                    variant="outlined"
+                    label="Date"
+                    margin="normal"
+                    format="MM/dd/yyyy hh:mm a"
+                    {...input} />
+                )}
+              </Field>
               <FormHelperText error>{errorMsg}</FormHelperText>
               <Grid container justify="flex-end">
                 <Button
@@ -125,7 +119,7 @@ class MealForm extends React.Component {
 
 MealForm.propTypes = {
   title: PropTypes.string,
-  open: PropTypes.boolean,
+  open: PropTypes.bool,
   onClose: PropTypes.func,
   afterClosed: PropTypes.func,
   onSubmit: PropTypes.func,

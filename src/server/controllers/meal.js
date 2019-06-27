@@ -2,7 +2,9 @@ import {asyncMiddleware, parseSort} from '../utils';
 import mongoose from 'mongoose';
 import createError from 'http-errors';
 import get from 'lodash/get';
-import compact from 'lodash/compact';
+import DateFnsUtils from '@date-io/date-fns';
+
+const dateFns = new DateFnsUtils();
 
 const meal_create_post = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
@@ -46,15 +48,14 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
   const text = get(req, 'query.text', null);
   const minCalories = get(req, 'query.min_calories', null);
   const maxCalories = get(req, 'query.max_calories', null);
+  const date = get(req, 'query.date', null);
   const startDate = get(req, 'query.start_date', null);
   const endDate = get(req, 'query.end_date', null);
   const startTime = get(req, 'query.start_time', null);
   const endTime = get(req, 'query.end_time', null);
-  const hasDate = Boolean(compact([startDate, endDate, startTime, endTime]).length);
 
-  //TODO: validate dates and times
+  //TODO: validate  times
   //Expect 24 hour format for time (HH:MM)
-  //Expect YYYY-MM-DD format for date
 
   try {
     let aggregatePipeline = [];
@@ -93,21 +94,41 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
 
     const datesMatchAnd = [];
 
-    if (startDate) datesMatchAnd.push({formatted_date: {'$gte': startDate}});
-    if (endDate) datesMatchAnd.push({formatted_date: {'$lte': endDate}});
+    if (date) {
+      const initialDate = dateFns.date(date);
+      const dateStr = dateFns.format(initialDate, 'yyyy-MM-dd');
+      datesMatchAnd.push({formatted_date: dateStr});
+    }
+
+    if (startDate) {
+      const initialDate = dateFns.date(startDate);
+      const dateStr = dateFns.format(initialDate, 'yyyy-MM-dd');
+      datesMatchAnd.push({formatted_date: {'$gte': dateStr}});
+    }
+
+    if (endDate) {
+      const initialDate = dateFns.date(endDate);
+      const dateStr = dateFns.format(initialDate, 'yyyy-MM-dd');
+      datesMatchAnd.push({formatted_date: {'$lte': dateStr}});
+    }
+
     if (startTime) datesMatchAnd.push({formatted_time: {'$gte': startTime}});
     if (endTime) datesMatchAnd.push({formatted_time: {'$lte': endTime}});
 
-    if (hasDate) {
-      aggregatePipeline.push({
-        '$match': {
-          '$and': datesMatchAnd,
-        },
-      });
-    }
+    aggregatePipeline.push({
+      '$match': {
+        '$and': datesMatchAnd,
+      },
+    });
 
     const countDoc = await Meal.aggregate([].concat(aggregatePipeline, [
-      {'$count': 'total'},
+      {
+        '$group': {
+          _id: null,
+          total: {'$sum': 1},
+          total_calories: {'$sum': '$calories_count'},
+        },
+      },
     ])).exec();
 
     const limit = req.query.limit;
@@ -140,7 +161,12 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
       return meal;
     });
 
-    return res.json({items: meals, total: get(countDoc, '0.total', 0), page});
+    return res.json({
+      items: meals,
+      total: get(countDoc, '0.total', 0),
+      total_calories: get(countDoc, '0.total_calories', 0),
+      page,
+    });
   } catch (e) {
     return next(e);
   }

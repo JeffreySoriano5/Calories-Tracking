@@ -3,11 +3,13 @@ import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import React, {Component} from 'react';
 import {Provider} from 'react-redux';
+import DateFnsUtils from "@date-io/date-fns";
+import {MuiPickersUtilsProvider} from '@material-ui/pickers';
+import axios from 'axios';
+import {AxiosProvider} from 'react-axios';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import Log from 'common/utils/log';
 import App from './App';
-import axios from 'axios';
-import {AxiosProvider} from 'react-axios';
 
 class Root extends Component {
   /**
@@ -55,9 +57,11 @@ class Root extends Component {
     return (
       <Provider store={store}>
         <AxiosProvider instance={this.axios}>
-          <Router>
-            <Route path="/" component={App}/>
-          </Router>
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <Router>
+              <Route path="/" component={App}/>
+            </Router>
+          </MuiPickersUtilsProvider>
         </AxiosProvider>
       </Provider>
     );

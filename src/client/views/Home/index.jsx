@@ -6,17 +6,19 @@ import capitalize from 'lodash/capitalize';
 import get from 'lodash/get';
 import {withRouter} from 'react-router-dom';
 import DateFnsUtils from "@date-io/date-fns";
-import {withStyles} from '@material-ui/core/styles';
-import MaterialTable from 'material-table';
 import {withAxios} from 'react-axios';
+import {withStyles} from '@material-ui/core/styles';
+import MaterialTable, {MTableToolbar} from 'material-table';
 import Button from '@material-ui/core/Button';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Grid from '@material-ui/core/Grid';
 import Switch from '@material-ui/core/Switch';
 import Chip from '@material-ui/core/Chip';
 import ThumbDown from '@material-ui/icons/ThumbDown';
 import ThumbUp from '@material-ui/icons/ThumbUp';
 import Dialog from 'common/components/Dialog';
+import {KeyboardDatePicker} from "@material-ui/pickers";
 import {accountConnector, hasPermissions} from 'common/utils';
 import MealForm from './component/Form';
 
@@ -48,7 +50,9 @@ class Home extends React.Component {
     handler: null,
     errorMsg: null,
     showAll: false,
-    totalForDay: 0,
+    totalCalories: 0,
+    selectedDate: new Date(),
+    advancedQuery: false,
   };
 
   constructor(props) {
@@ -70,17 +74,24 @@ class Home extends React.Component {
   };
 
   getMeals = (query) => {
+    const {showAll, advancedQuery, selectedDate} = this.state;
+    const params = {
+      page: query.page + 1,
+      limit: query.pageSize,
+      text: query.search,
+    };
+
+    if (showAll) params.all = true;
+
+    if (selectedDate) {
+      params.date = selectedDate;
+    } else {
+
+    }
+
     return new Promise((resolve, reject) => {
-      const params = {
-        page: query.page + 1,
-        limit: query.pageSize,
-        text: query.search,
-      };
-
-      if (this.state.showAll) params.all = true;
-
       this.props.axios.get('/meals', {params}).then(({data}) => {
-        if (data.totalForDay) this.setState({totalForDay: data.totalForDay});
+        this.setState({totalCalories: data.total_calories});
 
         resolve({
           data: data.items,
@@ -137,12 +148,13 @@ class Home extends React.Component {
     if (hasPermissions(user, ['read_meal'])) {
       return <span>
         <span>Meals</span>
-      <FormControlLabel className={classes.viewAllBtn}
-                        control={
-                          <Switch checked={this.state.showAll} color="primary" onChange={this.onShowAllToggle}
-                                  value="showAll"/>
-                        }
-                        label="Show all users meals"
+      <FormControlLabel
+        className={classes.viewAllBtn}
+        control={
+          <Switch checked={this.state.showAll} color="primary" onChange={this.onShowAllToggle}
+                  value="showAll"/>
+        }
+        label="Show all users meals"
       />
       </span>;
     }
@@ -152,11 +164,24 @@ class Home extends React.Component {
 
   getColumns = () => {
     const {user, classes} = this.props;
+    const {selectedDate, totalCalories, showAll} = this.state;
+    const isDayView = Boolean(selectedDate) && !showAll;
 
-    //TODO: just take into account when on one day view
-    const {totalForDay} = this.state;
-    const isUnderLimit = (totalForDay < user.calories_per_day);
-    const chipCls = (isUnderLimit) ? classes.greenChip : classes.redChip;
+    let chipExtraProps = {};
+
+    //NOTE: just take colors into account when on day view and single user
+    if (isDayView) {
+      const isUnderLimit = (totalCalories < user.calories_per_day);
+      const chipCls = (isUnderLimit) ? classes.greenChip : classes.redChip;
+
+      const icon = isUnderLimit ? <ThumbUp className={classes.chipIcon}/> : <ThumbDown className={classes.chipIcon}/>;
+
+      chipExtraProps = {
+        icon,
+        className: chipCls,
+      }
+    }
+
 
     const columns = [
       {title: "Meal", field: "text"},
@@ -164,17 +189,7 @@ class Home extends React.Component {
         title: "Calories",
         field: "calories_count",
         render: rowData => {
-          const icon = isUnderLimit ? <ThumbUp className={classes.chipIcon}/> :
-            <ThumbDown className={classes.chipIcon}/>;
-
-          const props = {
-            icon: icon,
-            label: rowData.calories_count,
-            className: chipCls,
-          };
-
-
-          return <Chip size='small' {...props}/>
+          return <Chip size='small' label={rowData.calories_count} {...chipExtraProps}/>
         }
       },
       {
@@ -208,9 +223,17 @@ class Home extends React.Component {
     return isString(value) ? value : get(value, 'id', null);
   };
 
+  handleDateChange = (date) => {
+    this.setState({selectedDate: date, singleDate: true});
+    this.tableRef.current.onQueryChange()
+  };
+
   render() {
     const {user} = this.props;
-    const {operation, isOpen, actualMeal, handler, errorMsg, showAll, isDeleting} = this.state;
+    const {
+      operation, isOpen, actualMeal, handler, errorMsg, showAll,
+      isDeleting, selectedDate,
+    } = this.state;
 
     const deleteActions = [
       <Button onClick={this.onDeleteClose} key='cancel' color="primary">
@@ -285,6 +308,24 @@ class Home extends React.Component {
             pageSizeOptions: [10, 15, 20],
             emptyRowsWhenPaging: false,
           }}
+          components={{
+            Toolbar: props => (
+              <div>
+                <MTableToolbar {...props} />
+                <Grid container justify='center'>
+                  <KeyboardDatePicker
+                    inputVariant="outlined"
+                    variant="outlined"
+                    label="Date"
+                    margin="normal"
+                    format="MM/dd/yyyy"
+                    value={selectedDate || new Date()}
+                    onChange={this.handleDateChange}
+                  />
+                </Grid>
+              </div>
+            ),
+          }}
         />
       </React.Fragment>
     );
@@ -297,7 +338,7 @@ Home.propTypes = {
   location: PropTypes.object,
   user: PropTypes.object,
   match: PropTypes.object,
-  axios: PropTypes.object,
+  axios: PropTypes.func,
   classes: PropTypes.object,
 };
 
