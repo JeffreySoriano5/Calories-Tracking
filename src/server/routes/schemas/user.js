@@ -14,7 +14,7 @@ export const createSchema = {
 
 export const listSchema = {
   query: Joi.object().keys({
-    name: Joi.string().max(50),
+    name: Joi.string().max(50).allow(''),
     calories_per_day_min: Joi.number(),
     calories_per_day_max: Joi.number(),
     limit: Joi.number().default(10),

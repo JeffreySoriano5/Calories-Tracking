@@ -11,7 +11,7 @@ export const parseSort = (sort) => {
     if (key.startsWith('-')) ac[key.slice(1)] = -1;
     else ac[key] = 1;
     return ac;
-  }, {})
+  }, {});
 };
 
 export const asyncMiddleware = (fn) => {

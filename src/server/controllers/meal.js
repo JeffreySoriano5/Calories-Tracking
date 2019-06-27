@@ -97,7 +97,7 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
     }
 
     const countDoc = await Meal.aggregate([].concat(aggregatePipeline, [
-      {'$count': 'total'}
+      {'$count': 'total'},
     ])).exec();
 
     const limit = req.query.limit;
@@ -108,7 +108,7 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
     aggregatePipeline = [].concat(aggregatePipeline, [
       {'$sort': parseSort(sort)},
       {'$skip': skip},
-      {'$limit': skip + limit}
+      {'$limit': skip + limit},
     ]);
 
     let meals = await Meal.aggregate(aggregatePipeline).exec();

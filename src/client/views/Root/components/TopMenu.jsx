@@ -7,7 +7,10 @@ import {withAxios} from 'react-axios';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import {connect} from 'react-redux';
 import {logout} from 'common/redux/actions/auth'
 
@@ -21,6 +24,9 @@ const styles = () => ({
 });
 
 class TopMenu extends React.Component {
+  state = {
+    menuAnchor: null,
+  };
 
   onLogout = () => {
     this.props.axios.post('/auth/logout').then(() => {
@@ -28,8 +34,18 @@ class TopMenu extends React.Component {
     });
   };
 
+  onMenuOpen = (event) => {
+    this.setState({menuAnchor: event.currentTarget})
+  };
+
+  onMenuClose = () => {
+    this.setState({menuAnchor: null})
+  };
+
   render() {
     const {classes} = this.props;
+
+    const anchor = this.state.menuAnchor;
 
     return (
       <div className={classes.root}>
@@ -38,7 +54,25 @@ class TopMenu extends React.Component {
             <Typography variant="h6" className={classes.title}>
               News
             </Typography>
-            <Button color="inherit" onClick={this.onLogout}>Logout</Button>
+            <IconButton
+              onClick={this.onMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle/>
+            </IconButton>
+            <Menu id="user-menu"
+                  DanchorEl={anchor}
+                  keepMounted
+                  open={Boolean(anchor)}
+                  onClose={this.onMenuClose}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+            >
+              <MenuItem>Profile</MenuItem>
+              <MenuItem onClick={this.onLogout}>Logout</MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
       </div>

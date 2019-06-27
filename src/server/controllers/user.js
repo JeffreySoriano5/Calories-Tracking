@@ -63,10 +63,10 @@ const user_list = asyncMiddleware(async (req, res, next) => {
   const sort = req.query.sort;
 
   try {
-    let users = await User.paginate(q, {sort, page, limit}).exec();
-    users = users.map((user) => user.toObject());
+    let result = await User.paginate(q, {sort, page, limit});
+    const items = result.docs.map((user) => user.toObject());
 
-    return res.json(users);
+    return res.json({items, total: result.totalDocs, page});
   } catch (e) {
     return next(e);
   }

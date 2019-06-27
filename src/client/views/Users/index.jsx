@@ -6,15 +6,15 @@ import MaterialTable from 'material-table';
 import {withAxios} from 'react-axios';
 import {accountConnector} from 'common/utils';
 
-class Home extends React.Component {
+class Users extends React.Component {
 
-  getMeals = (query) => {
+  getUsers = (query) => {
     return new Promise((resolve, reject) => {
-      this.props.axios.get('/meals', {
+      this.props.axios.get('/users', {
         params: {
           page: query.page + 1,
           limit: query.pageSize,
-          text: query.search,
+          name: query.search,
         }
       }).then(({data}) => {
         resolve({
@@ -23,7 +23,7 @@ class Home extends React.Component {
           totalCount: data.total, // total page number
         });
       }).catch(({response}) => {
-        reject(response.data);
+        reject(response);
       });
 
     });
@@ -33,19 +33,18 @@ class Home extends React.Component {
     return (
       <MaterialTable
         columns={[
-          {title: "Meal", field: "text"},
-          {title: "Calories", field: "calories_count"},
-          {title: "Date", field: "formatted_date"},
-          {title: "Time", field: "formatted_time"},
+          {title: "Name", field: "first_name", render: rowData => `${rowData.first_name} ${rowData.last_name}`},
+          {title: "Calores Per Day", field: "calories_per_day"},
+          {title: "Role", field: "role"},
         ]}
-        data={this.getMeals}
+        data={this.getUsers}
       />
     );
   }
 }
 
 
-Home.propTypes = {
+Users.propTypes = {
   history: PropTypes.object,
   location: PropTypes.object,
   user: PropTypes.object,
@@ -57,4 +56,4 @@ export default flow(
   withRouter,
   withAxios,
   accountConnector,
-)(Home);
+)(Users);

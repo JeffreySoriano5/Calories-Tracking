@@ -95,8 +95,8 @@ userSchema.methods.removeRole = async function () {
   return user;
 };
 
-userSchema.plugin(passportLocalMongoose, {usernameField: 'email', usernameLowerCase: true});
 userSchema.plugin(mongoosePaginate);
+userSchema.plugin(passportLocalMongoose, {usernameField: 'email', usernameLowerCase: true});
 
 mongoose.model('User', userSchema);
 

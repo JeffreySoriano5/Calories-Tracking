@@ -7,9 +7,10 @@ import flow from 'lodash/flow';
 import {withRouter} from 'react-router';
 import {accountConnector} from 'common/utils';
 // views
-import Home from 'views/Home';
 import Login from 'views/Login';
 import SignUp from 'views/SignUp';
+import Home from 'views/Home';
+import Users from 'views/Users';
 
 import TopMenu from './components/TopMenu';
 
@@ -72,7 +73,7 @@ class App extends React.Component {
    */
   render() {
     const {user} = this.props;
-    const routes = [];
+    let routes = [];
 
     const nonAuthRoutes = [
       <Route exact path="/login" key="login" component={Login}/>,
@@ -81,7 +82,10 @@ class App extends React.Component {
 
     if (!user) routes.push(...nonAuthRoutes);
 
-    routes.push(<AuthRoute path="/" exact key="home" component={Home} user={user}/>);
+    routes = routes.concat([
+      <AuthRoute path="/" exact key="home" component={Home} user={user}/>,
+      <AuthRoute path="/users" exact key="users" component={Users} user={user}/>
+    ]);
 
     return (
       <div className="app">
