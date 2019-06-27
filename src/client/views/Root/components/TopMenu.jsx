@@ -48,6 +48,9 @@ class TopMenu extends React.Component {
 
 TopMenu.propTypes = {
   history: PropTypes.object.isRequired,
+  axios: PropTypes.object,
+  logout: PropTypes.func,
+  classes: PropTypes.object,
 };
 
 const logoutConnector = connect(null, {logout});

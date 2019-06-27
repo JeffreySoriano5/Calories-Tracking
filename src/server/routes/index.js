@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/*', function (req, res) {
   const user = (req.user) ? req.user.toObject() : null;
 
-  res.render('index.html', {auth: JSON.stringify(user)});
+  res.render('index.html', {user: JSON.stringify(user)});
 });
 
 export default router;

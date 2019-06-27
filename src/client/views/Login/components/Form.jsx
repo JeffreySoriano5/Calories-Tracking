@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Form, Field} from 'react-final-form'
 import flow from 'lodash/flow';
-import validate from 'validate.js';
 import {Link as RouterLink} from 'react-router-dom';
 import {withStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -10,10 +9,11 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Link from '@material-ui/core/Link';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import {validators, composeValidators} from 'common/utils';
 
 const styles = theme => ({
   form: {
-    width: '100%', // Fix IE 11 issue.
+    width: '100%',
     marginTop: theme.spacing(1),
   },
   passField: {
@@ -24,31 +24,20 @@ const styles = theme => ({
   },
 });
 
-const required = value => {
-  return (validate.isEmpty(value)) ? 'Required' : undefined;
-};
-
-const isEmail = value => {
-  const error = validate({value}, {
-    value: {email: true},
-  });
-
-  return (error) ? 'Must be a valid email' : undefined;
-};
-
-const composeValidators = (...validators) => value =>
-  validators.reduce((error, validator) => error || validator(value), undefined);
-
 class LoginForm extends React.Component {
   render() {
-    const {classes, onSubmit, errorMsg} = this.props;
+    const {classes, onSubmit, errorMsg, email} = this.props;
+    let initialValues;
+
+    if (email) initialValues = {email};
 
     return (
       <Form
         onSubmit={onSubmit}
+        initialValues={initialValues}
         render={({handleSubmit, submitting, invalid}) => (
           <form onSubmit={handleSubmit} className={classes.form}>
-            <Field name="email" validate={composeValidators(required, isEmail)}>
+            <Field name="email" validate={composeValidators(validators.isRequired, validators.isEmail)}>
               {({input, meta}) => (
                 <TextField
                   {...input}
@@ -65,7 +54,7 @@ class LoginForm extends React.Component {
                 />
               )}
             </Field>
-            <Field name="password" validate={required}>
+            <Field name="password" validate={validators.isRequired}>
               {({input, meta}) => (
                 <TextField
                   {...input}
@@ -112,6 +101,8 @@ class LoginForm extends React.Component {
 LoginForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   errorMsg: PropTypes.string,
+  email: PropTypes.string,
+  classes: PropTypes.object,
 };
 
 export default flow(

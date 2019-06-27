@@ -1,5 +1,7 @@
 import {Joi} from '../../utils';
 
+//TODO: add regex for password
+//TODO: also modify on signup/signin and edit password
 export const createSchema = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),

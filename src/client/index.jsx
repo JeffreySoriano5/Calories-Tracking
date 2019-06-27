@@ -6,16 +6,16 @@ import Log from 'common/utils/log';
 import Root from 'views/Root';
 import {configure} from './store';
 
-const auth = window.auth;
+const user = window.user;
 
-Log.info('Auth credentials come from backend', auth);
+Log.info('user comes from the backend if authenticated', user);
 
 const history = createBrowserHistory({
   basename: '/',
 });
 
 const store = configure({
-  auth: auth,
+  auth: {user: (user || null)},
 });
 
 const concurrent = true; // it could come from window.__CONCURRENT_RENDERING__

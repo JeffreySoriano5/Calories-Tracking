@@ -69,13 +69,13 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
         '$addFields': {
           formatted_date: {
             '$dateToString': {
-              format: "%Y-%m-%d",
+              format: '%Y-%m-%d',
               date: '$date',
             },
           },
           formatted_time: {
             '$dateToString': {
-              format: "%H:%M",
+              format: '%H:%M',
               date: '$date',
             },
           },

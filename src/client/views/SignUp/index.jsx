@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import flow from 'lodash/flow';
+import omit from 'lodash/omit';
 import {connect} from 'react-redux';
 import {withRouter} from 'react-router-dom';
 import {withAxios} from 'react-axios';
@@ -10,14 +11,13 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import {setAccountInfo} from 'common/redux/actions/auth'
-import LoginForm from './components/Form';
-import {createSelector} from 'reselect';
+import {setSignUpInfo} from 'common/redux/actions/auth'
+import SignUpForm from './components/Form';
 
 const styles = theme => ({
   '@global': {
     body: {
-      backgroundColor: theme.palette.grey.white,
+      backgroundColor: theme.palette.common.white,
     },
   },
   paper: {
@@ -37,29 +37,24 @@ const styles = theme => ({
 
 class Login extends React.Component {
   state = {
-    loginError: null,
+    signupError: null,
   };
 
-  onLogin = (values) => {
-    this.setState({loginError: false});
-
-    this.props.axios.post('/auth/login', values).then((response) => {
-      this.props.setAccountInfo(response.data);
-      this.props.history.push('/');
+  onSignUp = (values) => {
+    this.props.axios.post('/auth/signup', omit(values, 'confirm_password')).then((response) => {
+      this.props.setSignUpInfo(response.data.email);
+      this.props.history.push('/login');
     }).catch(({response}) => {
       let errorMsg = "Something went wrong signing in. Please try again later";
 
-      if (response.status === 401) errorMsg = "Incorrect email or password";
+      if (response.status === 409) errorMsg = "Email is already in use.";
 
-      this.setState({loginError: errorMsg});
+      this.setState({signupError: errorMsg});
     });
   };
 
   render() {
-    const {classes, signup} = this.props;
-
-    let email;
-    if (signup && signup.email) email = signup.email;
+    const {classes} = this.props;
 
     return (
       <div>
@@ -70,9 +65,9 @@ class Login extends React.Component {
               <LockOutlinedIcon/>
             </Avatar>
             <Typography component="h1" variant="h5">
-              Sign in
+              Sign up
             </Typography>
-            <LoginForm onSubmit={this.onLogin} errorMsg={this.state.loginError} email={email}/>
+            <SignUpForm onSubmit={this.onSignUp} errorMsg={this.state.signupError}/>
           </div>
         </Container>
       </div>
@@ -86,15 +81,11 @@ Login.propTypes = {
   user: PropTypes.object,
   match: PropTypes.object,
   axios: PropTypes.object,
-  setAccountInfo: PropTypes.func,
+  setSignUpInfo: PropTypes.func,
   classes: PropTypes.object,
-  signup: PropTypes.object,
 };
 
-const loginConnector = connect(createSelector(
-  (state) => state.auth,
-  (auth) => (auth),
-), {setAccountInfo});
+const loginConnector = connect(null, {setSignUpInfo});
 
 export default flow(
   withRouter,
