@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 import get from 'lodash/get';
 import compact from 'lodash/compact';
-import {getRbac as getAuthorization} from '../startup/authorization';
 
 const meal_create_post = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
@@ -28,10 +27,9 @@ const meal_get = asyncMiddleware(async (req, res, next) => {
 
     meal = meal.toObject();
     const authUser = req.user.toObject();
-    const rbac = getAuthorization();
 
     if (meal.user !== authUser.id) {
-      const hasPermission = await req.user.can(rbac, 'read', 'meal');
+      const hasPermission = await req.user.can('read', 'meal');
       if (!hasPermission) return next(createError(404));
     }
 
@@ -63,7 +61,7 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
     const matchQuery = {};
     const matchAnd = [];
 
-    const hasAllPermission = await req.user.can(getAuthorization(), 'read', 'meal');
+    const hasAllPermission = await req.user.can('read', 'meal');
 
     if (getAll && !hasAllPermission) getAll = false;
     if (!getAll) matchAnd.push({user: req.user._id});
@@ -145,10 +143,9 @@ const meal_update = asyncMiddleware(async (req, res, next) => {
 
     const mealObj = meal.toObject();
     const authUser = req.user.toObject();
-    const rbac = getAuthorization();
 
     if (mealObj.user !== authUser.id) {
-      const hasPermission = await req.user.can(rbac, 'update', 'meal');
+      const hasPermission = await req.user.can('update', 'meal');
       if (!hasPermission) return next(createError(404));
     }
 
@@ -170,10 +167,9 @@ const meal_delete = asyncMiddleware(async (req, res, next) => {
 
     meal = meal.toObject();
     const authUser = req.user.toObject();
-    const rbac = getAuthorization();
 
     if (meal.user !== authUser.id) {
-      const hasPermission = await req.user.can(rbac, 'delete', 'meal');
+      const hasPermission = await req.user.can('delete', 'meal');
       if (!hasPermission) return next(createError(404));
     }
 

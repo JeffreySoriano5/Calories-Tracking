@@ -1,15 +1,16 @@
 import createError from 'http-errors';
 import {asyncMiddleware} from '../utils';
 import mongoose from 'mongoose';
-import {getRbac} from '../startup/authorization';
 
 const user_signUp_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const {password, ...data} = req.body;
 
   try {
-    const user = await User.register(data, password);
-    return res.json(user.toObject()).status(201);
+    let user = await User.register(data, password);
+    user = await user.toPlainObject();
+
+    return res.json(user).status(201);
   } catch (e) {
     if (e.name === 'UserExistsError') {
       return next(createError(409, e.message));
@@ -20,8 +21,7 @@ const user_signUp_post = asyncMiddleware(async (req, res, next) => {
 });
 
 const user_login_post = asyncMiddleware(async (req, res) => {
-  const user = req.user.toObject();
-  user.permissions = await req.user.getScope(getRbac());
+  const user = await req.user.toPlainObject();
 
   return res.json(user);
 });

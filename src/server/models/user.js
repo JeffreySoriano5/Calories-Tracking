@@ -4,6 +4,7 @@ import passportLocalMongoose from 'passport-local-mongoose';
 import indexOf from 'lodash/indexOf';
 import without from 'lodash/without';
 import union from 'lodash/union';
+import {getRbac as getAuthorization} from '../startup/authorization';
 
 const userSchema = new mongoose.Schema({
   first_name: {
@@ -27,7 +28,17 @@ const userSchema = new mongoose.Schema({
   toObject: {virtuals: true},
 });
 
-userSchema.methods.getScope = async function (rbac) {
+userSchema.methods.toPlainObject = async function () {
+  const user = this.toObject();
+
+  user.permissions = await this.getScope();
+
+  return user;
+};
+
+userSchema.methods.getScope = async function () {
+  const rbac = getAuthorization();
+
   const permissions = this.permissions || [];
 
   const scope = await rbac.getScope(this.role);
@@ -35,7 +46,8 @@ userSchema.methods.getScope = async function (rbac) {
   return union(permissions, scope);
 };
 
-userSchema.methods.can = async function (rbac, action, resource) {
+userSchema.methods.can = async function (action, resource) {
+  const rbac = getAuthorization();
   const permission = await rbac.getPermission(action, resource);
   if (!permission) return false;
 
@@ -46,7 +58,8 @@ userSchema.methods.can = async function (rbac, action, resource) {
   return rbac.can(this.role, action, resource);
 };
 
-userSchema.methods.addPermission = async function (rbac, action, resource) {
+userSchema.methods.addPermission = async function (action, resource) {
+  const rbac = getAuthorization();
   const permission = await rbac.getPermission(action, resource);
 
   if (!permission) throw new Error('Permission not exists');
@@ -72,13 +85,17 @@ userSchema.methods.removePermission = async function (permissionName) {
   return user;
 };
 
-userSchema.methods.hasRole = async function (rbac, role) {
+userSchema.methods.hasRole = async function (role) {
+  const rbac = getAuthorization();
+
   if (!this.role) return false;
 
   return rbac.hasRole(this.role, role);
 };
 
-userSchema.methods.setRole = async function (rbac, role) {
+userSchema.methods.setRole = async function (role) {
+  const rbac = getAuthorization();
+
   if (this.role === role) return this;
 
   role = await rbac.getRole(role);

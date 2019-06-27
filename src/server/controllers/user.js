@@ -2,15 +2,16 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 import get from 'lodash/get';
 import {asyncMiddleware} from '../utils';
-import {getRbac as getAuthorization} from '../startup/authorization';
 
 const user_create_post = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const {password, ...data} = req.body;
 
   try {
-    const user = await User.register(data, password);
-    return res.json(user.toObject()).status(201);
+    let user = await User.register(data, password);
+    user = await user.toPlainObject();
+
+    return res.json(user).status(201);
   } catch (e) {
     if (e.name === 'UserExistsError') {
       return next(createError(409, e.message));
@@ -23,18 +24,19 @@ const user_create_post = asyncMiddleware(async (req, res, next) => {
 const user_get = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const authUser = req.user.toObject();
-  const rbac = getAuthorization();
 
   if (req.params.id !== authUser.id) {
-    const hasPermission = await req.user.can(rbac, 'read', 'user');
+    const hasPermission = await req.user.can('read', 'user');
     if (!hasPermission) return next(createError(404));
   }
 
   try {
-    const user = await User.findById(req.params.id).exec();
+    let user = await User.findById(req.params.id).exec();
     if (!user) return next(createError(404, 'User not found'));
 
-    return res.json(user.toObject());
+    user = await user.toPlainObject();
+
+    return res.json(user);
   } catch (e) {
     return next(e);
   }
@@ -84,10 +86,9 @@ const user_list = asyncMiddleware(async (req, res, next) => {
 const user_update = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const authUser = req.user.toObject();
-  const rbac = getAuthorization();
 
   if (req.params.id !== authUser.id) {
-    const hasPermission = await req.user.can(rbac, 'update', 'user');
+    const hasPermission = await req.user.can('update', 'user');
     if (!hasPermission) return next(createError(404));
   }
 
@@ -98,7 +99,9 @@ const user_update = asyncMiddleware(async (req, res, next) => {
     user.set(req.body);
     if (user.isModified()) user = await user.save();
 
-    return res.json(user.toObject());
+    user = await user.toPlainObject();
+
+    return res.json(user);
   } catch (e) {
     return next(e);
   }
@@ -107,10 +110,9 @@ const user_update = asyncMiddleware(async (req, res, next) => {
 const user_delete = asyncMiddleware(async (req, res, next) => {
   const User = mongoose.model('User');
   const authUser = req.user.toObject();
-  const rbac = getAuthorization();
 
   if (req.params.id !== authUser.id) {
-    const hasPermission = await req.user.can(rbac, 'delete', 'user');
+    const hasPermission = await req.user.can('delete', 'user');
     if (!hasPermission) return next(createError(404));
   }
 

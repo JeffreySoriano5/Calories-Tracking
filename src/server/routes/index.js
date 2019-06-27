@@ -1,14 +1,13 @@
 import express from 'express';
-import {getRbac} from '../startup/authorization';
 import {asyncMiddleware} from '../utils';
 
 const router = express.Router();
 
 /* GET home page. */
 router.get('/*', asyncMiddleware(async function (req, res) {
-  const user = (req.user) ? req.user.toObject() : null;
+  let user = (req.user) ? req.user : null;
 
-  if (user) user.permissions = await req.user.getScope(getRbac());
+  if (user) user = await req.user.toPlainObject();
 
   res.render('index.html', {user: JSON.stringify(user)});
 }));
