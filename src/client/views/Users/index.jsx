@@ -136,7 +136,7 @@ class Users extends React.Component {
           data={this.getUsers}
           actions={[
             {
-              icon: 'add',
+              icon: 'add_circle',
               tooltip: 'Add User',
               isFreeAction: true,
               onClick: () => {

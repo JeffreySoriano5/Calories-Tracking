@@ -2,15 +2,18 @@ import isEmpty from 'lodash/isEmpty';
 import queryString from 'query-string';
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import {withStyles} from '@material-ui/core';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import flow from 'lodash/flow';
 import {withRouter} from 'react-router';
 import {accountConnector, hasPermissions} from 'common/utils';
+import CssBaseline from '@material-ui/core/CssBaseline';
 // views
 import Login from 'views/Login';
 import SignUp from 'views/SignUp';
 import Home from 'views/Home';
 import Users from 'views/Users';
+import Profile from 'views/Profile';
 
 import TopMenu from './components/TopMenu';
 
@@ -67,6 +70,20 @@ AuthRoute.propTypes = {
   }),
 };
 
+const drawerWidth = 240;
+
+const styles = (theme) => ({
+  root: {
+    display: 'flex',
+  },
+  toolbar: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(3),
+  },
+});
+
 /**
  * App frame. Parent to all other views
  * @class App
@@ -78,7 +95,7 @@ class App extends React.Component {
    * @return {React.Component}
    */
   render() {
-    const {user} = this.props;
+    const {user, classes} = this.props;
     let routes = [];
 
     const nonAuthRoutes = [
@@ -91,16 +108,21 @@ class App extends React.Component {
     routes = routes.concat([
       <AuthRoute path="/" exact key="home" component={Home} user={user}/>,
       <AuthRoute path="/users" exact key="users" permissions={['read_user']} component={Users} user={user}/>,
+      <AuthRoute path="/profile" exact key="profile" component={Profile} user={user}/>,
       <Route exact path="/not-found" key="not-found" render={() => <div>NOT FOUND</div>}/>
     ]);
 
     return (
-      <div className="app">
+      <div className={classes.root}>
+        <CssBaseline/>
         <AuthRoute redirect={false} path="/" component={TopMenu} user={user}/>
-        <Switch>
-          {routes}
-          <Redirect to="/not-found"/>
-        </Switch>
+        <main className={classes.content}>
+          <div className={classes.toolbar}/>
+          <Switch>
+            {routes}
+            <Redirect to="/not-found"/>
+          </Switch>
+        </main>
       </div>
     );
   }
@@ -120,6 +142,7 @@ App.defaultProps = {
 };
 
 export default flow(
+  withStyles(styles),
   withRouter,
   accountConnector,
 )(App);

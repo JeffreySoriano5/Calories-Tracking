@@ -1,38 +1,96 @@
 import React from 'react';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {withRouter} from 'react-router';
 import flow from 'lodash/flow';
 import {withStyles} from '@material-ui/core/styles';
 import {withAxios} from 'react-axios';
 import AppBar from '@material-ui/core/AppBar';
+import Drawer from '@material-ui/core/Drawer';
 import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import MealIcon from '@material-ui/icons/Fastfood';
+import ProfileIcon from '@material-ui/icons/AccountCircle';
+import UsersIcon from '@material-ui/icons/People';
+import MenuIcon from '@material-ui/icons/Menu';
+import Divider from '@material-ui/core/Divider';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import LogoutIcon from '@material-ui/icons/PowerSettingsNew';
 import Typography from '@material-ui/core/Typography';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
-import AccountCircle from '@material-ui/icons/AccountCircle';
 import {connect} from 'react-redux';
-import {NavLink} from "react-router-dom";
 import {logout} from 'common/redux/actions/auth'
 import {accountConnector, hasPermissions} from 'common/utils';
 
+const drawerWidth = 240;
+
 const styles = (theme) => ({
   root: {
-    flexGrow: 1,
+    display: 'flex',
   },
-  filler: {
-    flexGrow: 1,
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
   },
-  link: {
-    textDecoration: 'none',
-    marginRight: theme.spacing(2),
-    color: theme.palette.common.white,
-  }
+  appBarShift: {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  menuButton: {
+    marginRight: 36,
+  },
+  hide: {
+    display: 'none',
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+  },
+  drawerOpen: {
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  drawerClose: {
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    overflowX: 'hidden',
+    width: theme.spacing(7) + 1,
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9) + 1,
+    },
+  },
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    ...theme.mixins.toolbar,
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+  },
 });
 
 class TopMenu extends React.Component {
   state = {
-    menuAnchor: null,
+    open: false,
   };
 
   onLogout = () => {
@@ -42,59 +100,91 @@ class TopMenu extends React.Component {
     });
   };
 
-  onMenuOpen = (event) => {
-    this.setState({menuAnchor: event.currentTarget})
+  handleDrawerOpen = () => {
+    this.setState({open: true})
   };
 
-  onMenuClose = () => {
-    this.setState({menuAnchor: null})
+  handleDrawerClose = () => {
+    this.setState({open: false})
+  };
+
+  redirect = (to) => {
+    return () => {
+      this.props.history.push(to);
+    }
   };
 
   render() {
     const {classes, user} = this.props;
 
-    const anchor = this.state.menuAnchor;
-    const activeStyle = {};
+    const open = this.state.open;
 
     return (
-      <div className={classes.root}>
-        <AppBar position="static">
+      <React.Fragment>
+        <AppBar
+          position="fixed"
+          className={clsx(classes.appBar, {
+            [classes.appBarShift]: open,
+          })}
+        >
           <Toolbar>
-            <NavLink exact to='/' activeStyle={activeStyle} className={classes.link}>
-              <Typography variant="h6">
-                Meals
-              </Typography>
-            </NavLink>
-            {user && hasPermissions(user, ['read_user']) &&
-            <NavLink exact to='/users' activeStyle={activeStyle} className={classes.link}>
-              <Typography variant="h6">
-                Users
-              </Typography>
-            </NavLink>
-            }
-            <div className={classes.filler}/>
             <IconButton
-              onClick={this.onMenuOpen}
               color="inherit"
+              aria-label="Open drawer"
+              onClick={this.handleDrawerOpen}
+              edge="start"
+              className={clsx(classes.menuButton, {
+                [classes.hide]: open,
+              })}
             >
-              <AccountCircle/>
+              <MenuIcon/>
             </IconButton>
-            <Menu id="user-menu"
-                  DanchorEl={anchor}
-                  keepMounted
-                  open={Boolean(anchor)}
-                  onClose={this.onMenuClose}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-            >
-              <MenuItem>Profile</MenuItem>
-              <MenuItem onClick={this.onLogout}>Logout</MenuItem>
-            </Menu>
+            <Typography variant="h6" noWrap>
+              Calo Tracking
+            </Typography>
           </Toolbar>
         </AppBar>
-      </div>
+        <Drawer
+          variant="permanent"
+          className={clsx(classes.drawer, {
+            [classes.drawerOpen]: open,
+            [classes.drawerClose]: !open,
+          })}
+          classes={{
+            paper: clsx({
+              [classes.drawerOpen]: open,
+              [classes.drawerClose]: !open,
+            }),
+          }}
+          open={open}
+        >
+          <div className={classes.toolbar}>
+            <IconButton onClick={this.handleDrawerClose}>
+              <ChevronLeftIcon/>
+            </IconButton>
+          </div>
+          <Divider/>
+          <List>
+            <ListItem button key='meals' onClick={this.redirect('/')}>
+              <ListItemIcon><MealIcon/> </ListItemIcon>
+              <ListItemText primary='Meals'/>
+            </ListItem>
+            {hasPermissions(user, ['read_user']) && <ListItem button key='users' onClick={this.redirect('/users')}>
+              <ListItemIcon> <UsersIcon/></ListItemIcon>
+              <ListItemText primary={'Users'}/>
+            </ListItem>}
+            <ListItem button key='profile' onClick={this.redirect('/profile')}>
+              <ListItemIcon> <ProfileIcon/></ListItemIcon>
+              <ListItemText primary={'Profile'}/>
+            </ListItem>
+            <Divider/>
+            <ListItem button key='logout' onClick={this.onLogout}>
+              <ListItemIcon><LogoutIcon/> </ListItemIcon>
+              <ListItemText primary={'Logout'}/>
+            </ListItem>
+          </List>
+        </Drawer>
+      </React.Fragment>
     );
   }
 }

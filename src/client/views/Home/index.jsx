@@ -148,7 +148,7 @@ class Home extends React.Component {
           data={this.getMeals}
           actions={[
             {
-              icon: 'add',
+              icon: 'add_circle',
               tooltip: 'Add Meal',
               isFreeAction: true,
               onClick: () => {

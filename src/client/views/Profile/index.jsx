@@ -14,6 +14,7 @@ import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import {setSignUpInfo} from 'common/redux/actions/auth'
 import UserForm from 'common/components/UserForm';
+import Grid from '@material-ui/core/Grid';
 
 const styles = theme => ({
   '@global': {
@@ -36,43 +37,45 @@ const styles = theme => ({
   },
 });
 
-class Signup extends React.Component {
+class Login extends React.Component {
   state = {
-    signupError: null,
+    errorMsg: null,
   };
 
-  onSignUp = (values) => {
-    this.props.axios.post('/auth/signup', omit(values, 'confirm_password')).then((response) => {
-      this.props.setSignUpInfo(response.data.email);
-      this.props.history.push('/login');
-    }).catch(({response}) => {
-      let errorMsg = "Something went wrong signing in. Please try again later";
+  onCancel = () => {
+    this.props.history.goBack();
+  };
 
-      if (response.status === 409) errorMsg = "Email is already in use.";
+  onUpdate = (values) => {
+    values = omit(values, ['email']);
 
-      this.setState({signupError: errorMsg});
+    this.props.axios.put(`/users/${this.state.actualUser.id}`, values).then(() => {
+      this.onClose();
+      this.tableRef.current.onQueryChange();
+    }).catch(() => {
+      this.setState({errorMsg: "Something went wrong updating. Please try again later"});
     });
   };
 
-  getFooter = (submitting, invalid) => {
-    const {classes} = this.props;
-
+  getFooter = (submitting, invalid, dirty) => {
     return (
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        disabled={submitting || invalid}
-        className={classes.submit}
-      >
-        Sign Up
-      </Button>
+      <Grid container justify="flex-end">
+        <Button
+          type="submit"
+          color="primary"
+          disabled={!dirty}
+        >
+          Update
+        </Button>
+        <Button onClick={this.onCancel} color="primary">
+          Cancel
+        </Button>
+      </Grid>
     );
   };
 
   render() {
-    const {classes} = this.props;
+    const {classes, user} = this.props;
 
     return (
       <div>
@@ -83,9 +86,12 @@ class Signup extends React.Component {
               <LockOutlinedIcon/>
             </Avatar>
             <Typography component="h1" variant="h5">
-              Sign up
+              Profile
             </Typography>
-            <UserForm onSubmit={this.onSignUp} errorMsg={this.state.signupError} footer={this.getFooter}/>
+            <UserForm onSubmit={this.onUpdate} initialValues={user}
+                      operation='update'
+                      errorMsg={this.state.errorMsg}
+                      footer={this.getFooter}/>
           </div>
         </Container>
       </div>
@@ -93,7 +99,7 @@ class Signup extends React.Component {
   }
 }
 
-Signup.propTypes = {
+Login.propTypes = {
   history: PropTypes.object,
   location: PropTypes.object,
   user: PropTypes.object,
@@ -110,4 +116,4 @@ export default flow(
   withAxios,
   loginConnector,
   withStyles(styles)
-)(Signup);
+)(Login);
