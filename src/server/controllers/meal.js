@@ -2,10 +2,7 @@ import {asyncMiddleware, parseSort} from '../utils';
 import mongoose from 'mongoose';
 import createError from 'http-errors';
 import get from 'lodash/get';
-import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
-
-const dateFns = new DateFnsUtils();
 
 const meal_create_post = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
@@ -105,15 +102,13 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
     }
 
     if (startDate) {
-      const initialDate = dateFns.date(startDate);
-      const dateStr = dateFns.format(initialDate, 'yyyy-MM-dd');
-      datesMatchAnd.push({formatted_date: {'$gte': dateStr}});
+      let start = moment(startDate).startOf('day').utc();
+      datesMatchAnd.push({date: {'$gte': start.toDate()}});
     }
 
     if (endDate) {
-      const initialDate = dateFns.date(endDate);
-      const dateStr = dateFns.format(initialDate, 'yyyy-MM-dd');
-      datesMatchAnd.push({formatted_date: {'$lte': dateStr}});
+      let end = moment(endDate).endOf('day').utc();
+      datesMatchAnd.push({date: {'$lte': end.toDate()}});
     }
 
     if (startTime) datesMatchAnd.push({formatted_time: {'$gte': startTime}});

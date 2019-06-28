@@ -4,6 +4,7 @@ import flow from 'lodash/flow';
 import isString from 'lodash/isString';
 import capitalize from 'lodash/capitalize';
 import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import {withRouter} from 'react-router-dom';
 import DateFnsUtils from "@date-io/date-fns";
 import {withAxios} from 'react-axios';
@@ -85,7 +86,7 @@ class Home extends React.Component {
   };
 
   getMeals = (query) => {
-    const {showAll, advancedQuery, selectedDate} = this.state;
+    const {showAll, advancedQuery, advancedSelected, selectedDate} = this.state;
     const params = {
       page: query.page + 1,
       limit: query.pageSize,
@@ -94,10 +95,10 @@ class Home extends React.Component {
 
     if (showAll) params.all = true;
 
-    if (selectedDate) {
-      params.date = selectedDate;
-    } else {
+    if (advancedQuery) {
       debugger;
+    } else if (selectedDate) {
+      params.date = selectedDate;
     }
 
     return new Promise((resolve, reject) => {
@@ -155,22 +156,29 @@ class Home extends React.Component {
 
   getTitle = () => {
     const {user, classes} = this.props;
+    const {advancedQuery, showAll} = this.state;
 
-    if (hasPermissions(user, ['read_meal'])) {
-      return <span>
-        <span>Meals</span>
+    return <React.Fragment>
+      <span>Meals</span>
       <FormControlLabel
         className={classes.viewAllBtn}
         control={
-          <Switch checked={this.state.showAll} color="primary" onChange={this.onShowAllToggle}
+          <Switch checked={advancedQuery} color="primary" onChange={this.onAdvancedFilter}
+                  value="showAll"/>
+        }
+        label='Advanced Filters'
+      />
+      {hasPermissions(user, ['read_meal']) && <FormControlLabel
+        className={classes.viewAllBtn}
+        control={
+          <Switch checked={showAll} color="primary" onChange={this.onShowAllToggle}
                   value="showAll"/>
         }
         label="Show all users meals"
-      />
-      </span>;
-    }
+      />}
+    </React.Fragment>;
 
-    return 'Meals';
+
   };
 
   getColumns = () => {
@@ -239,12 +247,16 @@ class Home extends React.Component {
     this.tableRef.current.onQueryChange()
   };
 
+  onAdvancedSubmit = () => {
+    this.tableRef.current.onQueryChange()
+  };
+
   onAdvancedFilter = () => {
     const advanced = this.state.advancedQuery;
     this.setState({
       advancedQuery: !advanced,
-      selectDate: (advanced) ? new Date() : null,
-      advancedSelected: (advanced) ? null : {},
+      selectDate: (!advanced) ? null : new Date(),
+      advancedSelected: (!advanced) ? {} : null,
     });
   };
 
@@ -266,8 +278,7 @@ class Home extends React.Component {
       <DatePicker
         className={this.props.classes.dayPicker}
         autoOk
-        inputVariant="outlined"
-        variant="outlined"
+        variant="inline"
         label="Date"
         margin="normal"
         format="MM/dd/yyyy"
@@ -284,8 +295,7 @@ class Home extends React.Component {
         <DatePicker
           className={this.props.classes.dayPicker}
           autoOk
-          inputVariant="outlined"
-          variant="outlined"
+          variant="inline"
           label="Start Date"
           margin="normal"
           format="MM/dd/yyyy"
@@ -295,8 +305,7 @@ class Home extends React.Component {
         <DatePicker
           autoOk
           className={this.props.classes.dayPicker}
-          inputVariant="outlined"
-          variant="outlined"
+          variant="inline"
           label="End Date"
           margin="normal"
           format="MM/dd/yyyy"
@@ -312,6 +321,7 @@ class Home extends React.Component {
                     label="End Time" v
                     alue={advancedSelected.end_time}
                     onChange={this.handleAdvancedChange('end_time')}/>
+        <Button onClick={this.onAdvancedSubmit} disabled={isEmpty(advancedSelected)}>Search</Button>
       </React.Fragment>
     )
 
@@ -401,10 +411,9 @@ class Home extends React.Component {
             Toolbar: props => (
               <div>
                 <MTableToolbar {...props} />
-                {(advancedQuery) ? this.getAdvancedFilter() : this.getDayFilter()}
-                <Button className={classes.advancedFilterBtn} onClick={this.onAdvancedFilter}>
-                  {(advancedQuery) ? 'Day Filter' : 'Advanced Filters'}
-                </Button>
+                <Grid container className={classes.gridToolbar}>
+                  {(advancedQuery) ? this.getAdvancedFilter() : this.getDayFilter()}
+                </Grid>
               </div>
             ),
           }}
