@@ -14,6 +14,7 @@ import SignUp from 'views/SignUp';
 import Home from 'views/Home';
 import Users from 'views/Users';
 import Profile from 'views/Profile';
+import NotFound from 'views/NotFound';
 
 import TopMenu from './components/TopMenu';
 
@@ -112,9 +113,9 @@ class App extends React.Component {
       <AuthRoute path="/" exact key="home" component={Home} user={user}/>,
       <AuthRoute path="/users" exact key="users" permissions={['read_user']} component={Users} user={user}/>,
       <AuthRoute path="/profile" exact key="profile" component={Profile} user={user}/>,
-      <Route exact path="/not-found" key="not-found" render={() => <div>NOT FOUND</div>}/>
+      <Route exact path="/not-found" key="not-found" component={NotFound}/>
     ]);
-    //TODO:Create 404 page
+
     return (
       <div className={classes.root}>
         <CssBaseline/>

@@ -5,6 +5,7 @@ import isString from 'lodash/isString';
 import capitalize from 'lodash/capitalize';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
+import isNaN from 'lodash/isNaN';
 import {withRouter} from 'react-router-dom';
 import DateFnsUtils from "@date-io/date-fns";
 import {withAxios} from 'react-axios';
@@ -291,6 +292,18 @@ class Home extends React.Component {
     )
   };
 
+
+  renderLabel = (key) => {
+    const {advancedSelected} = this.state;
+    return (date) => {
+      if (!isNaN(date.getTime()) && advancedSelected[key]) {
+        return dateFns.format(date, "MM/dd/yyyy");
+      } else {
+        return '';
+      }
+    };
+  };
+
   getAdvancedFilter = () => {
     const {advancedSelected} = this.state;
     return (
@@ -303,6 +316,7 @@ class Home extends React.Component {
           margin="normal"
           format="MM/dd/yyyy"
           value={advancedSelected.start_date}
+          labelFunc={this.renderLabel('start_date')}
           onChange={this.handleAdvancedChange('start_date')}
         />
         <DatePicker
@@ -313,16 +327,19 @@ class Home extends React.Component {
           margin="normal"
           format="MM/dd/yyyy"
           value={advancedSelected.end_date}
+          labelFunc={this.renderLabel('end_date')}
           onChange={this.handleAdvancedChange('end_date')}
         />
         <TimePicker autoOk
                     label="Start Time"
                     value={advancedSelected.start_time}
+                    labelFunc={this.renderLabel('start_time')}
                     onChange={this.handleAdvancedChange('start_time')}
         />
         <TimePicker autoOk
                     label="End Time"
                     value={advancedSelected.end_time}
+                    labelFunc={this.renderLabel('end_time')}
                     onChange={this.handleAdvancedChange('end_time')}/>
         <Button onClick={this.onAdvancedSubmit} disabled={isEmpty(advancedSelected)}>Search</Button>
       </React.Fragment>

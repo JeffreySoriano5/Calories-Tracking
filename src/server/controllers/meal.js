@@ -4,6 +4,17 @@ import createError from 'http-errors';
 import get from 'lodash/get';
 import moment from 'moment';
 
+const _getDateQuery = function (date) {
+  let start = moment(date).startOf('day').utc();
+  let end = moment(date).endOf('day').utc();
+
+  return [{
+    date: {'$gte': start.toDate()},
+  }, {
+    date: {'$lte': end.toDate()},
+  }];
+};
+
 const meal_create_post = asyncMiddleware(async (req, res, next) => {
   const Meal = mongoose.model('Meal');
   const data = req.body;
@@ -84,16 +95,7 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
 
     const datesMatchAnd = [];
 
-    if (date) {
-      let start = moment(date).startOf('day').utc();
-      let end = moment(date).endOf('day').utc();
-
-      datesMatchAnd.push(...[{
-        date: {'$gte': start.toDate()},
-      }, {
-        date: {'$lte': end.toDate()},
-      }]);
-    }
+    if (date) datesMatchAnd.push(..._getDateQuery(date));
 
     if (startDate) {
       let start = moment(startDate).startOf('day').utc();
@@ -107,6 +109,8 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
 
     if (startTime) datesMatchAnd.push({formatted_time: {'$gte': moment(startTime).utc().format('HH:mm')}});
     if (endTime) datesMatchAnd.push({formatted_time: {'$lte': moment(endTime).utc().format('HH:mm')}});
+
+    if (!datesMatchAnd.length) datesMatchAnd.push(..._getDateQuery(new Date()));
 
     aggregatePipeline.push({
       '$match': {
