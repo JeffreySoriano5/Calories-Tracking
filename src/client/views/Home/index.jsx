@@ -293,11 +293,13 @@ class Home extends React.Component {
   };
 
 
-  renderLabel = (key) => {
+  renderLabel = (key, isHour = false) => {
     const {advancedSelected} = this.state;
+    const format = (isHour) ? "HH:mm a" : "MM/dd/yyyy";
+
     return (date) => {
       if (!isNaN(date.getTime()) && advancedSelected[key]) {
-        return dateFns.format(date, "MM/dd/yyyy");
+        return dateFns.format(date, format);
       } else {
         return '';
       }
@@ -333,13 +335,13 @@ class Home extends React.Component {
         <TimePicker autoOk
                     label="Start Time"
                     value={advancedSelected.start_time}
-                    labelFunc={this.renderLabel('start_time')}
+                    labelFunc={this.renderLabel('start_time', true)}
                     onChange={this.handleAdvancedChange('start_time')}
         />
         <TimePicker autoOk
                     label="End Time"
                     value={advancedSelected.end_time}
-                    labelFunc={this.renderLabel('end_time')}
+                    labelFunc={this.renderLabel('end_time', true)}
                     onChange={this.handleAdvancedChange('end_time')}/>
         <Button onClick={this.onAdvancedSubmit} disabled={isEmpty(advancedSelected)}>Search</Button>
       </React.Fragment>
