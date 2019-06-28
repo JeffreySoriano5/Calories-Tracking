@@ -322,7 +322,7 @@ class Home extends React.Component {
         />
         <TimePicker autoOk
                     label="End Time"
-                    alue={advancedSelected.end_time}
+                    value={advancedSelected.end_time}
                     onChange={this.handleAdvancedChange('end_time')}/>
         <Button onClick={this.onAdvancedSubmit} disabled={isEmpty(advancedSelected)}>Search</Button>
       </React.Fragment>

@@ -73,12 +73,6 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
 
     aggregatePipeline.push({
       '$addFields': {
-        formatted_date: {
-          '$dateToString': {
-            format: '%Y-%m-%d',
-            date: '$date',
-          },
-        },
         formatted_time: {
           '$dateToString': {
             format: '%H:%M',
@@ -111,8 +105,8 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
       datesMatchAnd.push({date: {'$lte': end.toDate()}});
     }
 
-    if (startTime) datesMatchAnd.push({formatted_time: {'$gte': startTime}});
-    if (endTime) datesMatchAnd.push({formatted_time: {'$lte': endTime}});
+    if (startTime) datesMatchAnd.push({formatted_time: {'$gte': moment(startTime).utc().format('HH:mm')}});
+    if (endTime) datesMatchAnd.push({formatted_time: {'$lte': moment(endTime).utc().format('HH:mm')}});
 
     aggregatePipeline.push({
       '$match': {
