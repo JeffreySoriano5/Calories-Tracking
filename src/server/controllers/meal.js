@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 import get from 'lodash/get';
 import DateFnsUtils from '@date-io/date-fns';
+import moment from 'moment';
 
 const dateFns = new DateFnsUtils();
 
@@ -30,7 +31,7 @@ const meal_get = asyncMiddleware(async (req, res, next) => {
     meal = meal.toObject();
     const authUser = req.user.toObject();
 
-    if (meal.user !== authUser.id) {
+    if (meal.user.toString() !== authUser.id) {
       const hasPermission = await req.user.can('read', 'meal');
       if (!hasPermission) return next(createError(404));
     }
@@ -54,8 +55,6 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
   const startTime = get(req, 'query.start_time', null);
   const endTime = get(req, 'query.end_time', null);
 
-  //TODO: validate  times
-  //Expect 24 hour format for time (HH:MM)
 
   try {
     let aggregatePipeline = [];
@@ -95,9 +94,14 @@ const meal_list = asyncMiddleware(async (req, res, next) => {
     const datesMatchAnd = [];
 
     if (date) {
-      const initialDate = dateFns.date(date);
-      const dateStr = dateFns.format(initialDate, 'yyyy-MM-dd');
-      datesMatchAnd.push({formatted_date: dateStr});
+      let start = moment(date).startOf('day').utc();
+      let end = moment(date).endOf('day').utc();
+
+      datesMatchAnd.push(...[{
+        date: {'$gte': start.toDate()},
+      }, {
+        date: {'$lte': end.toDate()},
+      }]);
     }
 
     if (startDate) {
@@ -182,7 +186,7 @@ const meal_update = asyncMiddleware(async (req, res, next) => {
     const mealObj = meal.toObject();
     const authUser = req.user.toObject();
 
-    if (mealObj.user !== authUser.id) {
+    if (mealObj.user.toString() !== authUser.id) {
       const hasPermission = await req.user.can('update', 'meal');
       if (!hasPermission) return next(createError(404));
     }
@@ -203,10 +207,10 @@ const meal_delete = asyncMiddleware(async (req, res, next) => {
     let meal = await Meal.findById(req.params.id).exec();
     if (!meal) return next(createError(404, 'Meal not found'));
 
-    meal = meal.toObject();
+    const mealObj = meal.toObject();
     const authUser = req.user.toObject();
 
-    if (meal.user !== authUser.id) {
+    if (mealObj.user.toString() !== authUser.id) {
       const hasPermission = await req.user.can('delete', 'meal');
       if (!hasPermission) return next(createError(404));
     }

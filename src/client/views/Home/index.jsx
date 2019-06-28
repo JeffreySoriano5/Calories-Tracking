@@ -17,8 +17,8 @@ import Switch from '@material-ui/core/Switch';
 import Chip from '@material-ui/core/Chip';
 import ThumbDown from '@material-ui/icons/ThumbDown';
 import ThumbUp from '@material-ui/icons/ThumbUp';
+import {DatePicker, TimePicker} from "@material-ui/pickers";
 import Dialog from 'common/components/Dialog';
-import {KeyboardDatePicker} from "@material-ui/pickers";
 import {accountConnector, hasPermissions} from 'common/utils';
 import MealForm from './component/Form';
 
@@ -38,6 +38,16 @@ const styles = theme => ({
   },
   chipIcon: {
     color: theme.palette.common.white,
+  },
+  gridToolbar: {
+    margin: theme.spacing(2, 3),
+  },
+  advancedFilterBtn: {
+    alignSelf: 'flex-end',
+    marginLeft: theme.spacing(1),
+  },
+  dayPicker: {
+    margin: 0,
   }
 });
 
@@ -52,6 +62,7 @@ class Home extends React.Component {
     showAll: false,
     totalCalories: 0,
     selectedDate: new Date(),
+    advancedSelected: null,
     advancedQuery: false,
   };
 
@@ -86,7 +97,7 @@ class Home extends React.Component {
     if (selectedDate) {
       params.date = selectedDate;
     } else {
-
+      debugger;
     }
 
     return new Promise((resolve, reject) => {
@@ -228,11 +239,89 @@ class Home extends React.Component {
     this.tableRef.current.onQueryChange()
   };
 
+  onAdvancedFilter = () => {
+    const advanced = this.state.advancedQuery;
+    this.setState({
+      advancedQuery: !advanced,
+      selectDate: (advanced) ? new Date() : null,
+      advancedSelected: (advanced) ? null : {},
+    });
+  };
+
+  handleAdvancedChange = (key) => {
+    return (date) => {
+      this.setState({
+        advancedSelected: {
+          ...this.state.advancedSelected,
+          [key]: date
+        },
+      });
+    };
+  };
+
+  getDayFilter = () => {
+    const {selectedDate} = this.state;
+
+    return (
+      <DatePicker
+        className={this.props.classes.dayPicker}
+        autoOk
+        inputVariant="outlined"
+        variant="outlined"
+        label="Date"
+        margin="normal"
+        format="MM/dd/yyyy"
+        value={selectedDate || new Date()}
+        onChange={this.handleDateChange}
+      />
+    )
+  };
+
+  getAdvancedFilter = () => {
+    const {advancedSelected} = this.state;
+    return (
+      <React.Fragment>
+        <DatePicker
+          className={this.props.classes.dayPicker}
+          autoOk
+          inputVariant="outlined"
+          variant="outlined"
+          label="Start Date"
+          margin="normal"
+          format="MM/dd/yyyy"
+          value={advancedSelected.start_date}
+          onChange={this.handleAdvancedChange('start_date')}
+        />
+        <DatePicker
+          autoOk
+          className={this.props.classes.dayPicker}
+          inputVariant="outlined"
+          variant="outlined"
+          label="End Date"
+          margin="normal"
+          format="MM/dd/yyyy"
+          value={advancedSelected.end_date}
+          onChange={this.handleAdvancedChange('end_date')}
+        />
+        <TimePicker autoOk
+                    label="Start Time"
+                    value={advancedSelected.start_time}
+                    onChange={this.handleAdvancedChange('start_time')}
+        />
+        <TimePicker autoOk
+                    label="End Time" v
+                    alue={advancedSelected.end_time}
+                    onChange={this.handleAdvancedChange('end_time')}/>
+      </React.Fragment>
+    )
+
+  };
+
   render() {
-    const {user} = this.props;
+    const {user, classes} = this.props;
     const {
-      operation, isOpen, actualMeal, handler, errorMsg, showAll,
-      isDeleting, selectedDate,
+      operation, isOpen, actualMeal, handler,
+      errorMsg, showAll, isDeleting, advancedQuery,
     } = this.state;
 
     const deleteActions = [
@@ -312,17 +401,10 @@ class Home extends React.Component {
             Toolbar: props => (
               <div>
                 <MTableToolbar {...props} />
-                <Grid container justify='center'>
-                  <KeyboardDatePicker
-                    inputVariant="outlined"
-                    variant="outlined"
-                    label="Date"
-                    margin="normal"
-                    format="MM/dd/yyyy"
-                    value={selectedDate || new Date()}
-                    onChange={this.handleDateChange}
-                  />
-                </Grid>
+                {(advancedQuery) ? this.getAdvancedFilter() : this.getDayFilter()}
+                <Button className={classes.advancedFilterBtn} onClick={this.onAdvancedFilter}>
+                  {(advancedQuery) ? 'Day Filter' : 'Advanced Filters'}
+                </Button>
               </div>
             ),
           }}
