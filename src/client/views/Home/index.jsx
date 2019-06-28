@@ -96,7 +96,10 @@ class Home extends React.Component {
     if (showAll) params.all = true;
 
     if (advancedQuery) {
-      debugger;
+      const keys = Object.keys(advancedSelected);
+      for (let i = 0; i < keys.length; i++) {
+        params[keys[i]] = advancedSelected[keys[i]];
+      }
     } else if (selectedDate) {
       params.date = selectedDate;
     }
@@ -183,8 +186,8 @@ class Home extends React.Component {
 
   getColumns = () => {
     const {user, classes} = this.props;
-    const {selectedDate, totalCalories, showAll} = this.state;
-    const isDayView = Boolean(selectedDate) && !showAll;
+    const {selectedDate, advancedQuery, totalCalories, showAll} = this.state;
+    const isDayView = Boolean(selectedDate) && !showAll && !advancedQuery;
 
     let chipExtraProps = {};
 
@@ -318,7 +321,7 @@ class Home extends React.Component {
                     onChange={this.handleAdvancedChange('start_time')}
         />
         <TimePicker autoOk
-                    label="End Time" v
+                    label="End Time"
                     alue={advancedSelected.end_time}
                     onChange={this.handleAdvancedChange('end_time')}/>
         <Button onClick={this.onAdvancedSubmit} disabled={isEmpty(advancedSelected)}>Search</Button>
